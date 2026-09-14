@@ -7,9 +7,11 @@ Pins mark where content was created; arcs connect related content across domains
 phases. Read it before changing anything. [`CLAUDE.md`](./CLAUDE.md) adds Claude-Code-specific
 working instructions on top.
 
+Live: <https://adeniyihub.netlify.app/> (auto deploys from `main`)
+
 ## Status
 
-Phase 0 — foundations. Astro scaffold and deploy pipeline only; no real content or globe yet.
+Phase 0 complete: Astro scaffold and deploy pipeline. No real content or globe yet.
 
 ## Stack
 
