@@ -6,11 +6,11 @@ location: louvain-la-neuve
 related: []
 tags: [networking, mininet, nftables, arptables, scapy, arp-poisoning, mac-flooding, syn-flood, dhcp-spoofing, port-scanning, dos, firewall]
 date: 2025-05-14
-summary: "Six layer-2/3 network attacks and their nftables/arptables mitigations, built and demonstrated in an isolated Mininet topology for UCLouvain's Computer System Security course."
+summary: "Six layer-2/3 network attacks and their nftables/arptables mitigations, built and demonstrated in an isolated Mininet topology."
 ---
 
 ## Context
-A hands-on security lab for UCLouvain's *Computer System Security* course (LINFO2347): build a small enterprise network in Mininet, carry out the classic layer-2/3 attacks against it, then defend against each one and prove the defence works.
+A hands-on security lab: build a small enterprise network in Mininet, carry out the classic layer-2/3 attacks against it, then defend against each one and prove the defence works.
 
 ## Approach
 An emulated topology (`topo.py`) split into three zones — Workstations, DMZ servers, and the Internet — with the baseline enterprise policy enforced by nftables rules applied at startup (DMZ servers can answer connections but never initiate them). Six attacks, each paired with a mitigation and a before/after test:
