@@ -42,6 +42,14 @@ npm run preview
 # TBD — built in Phase 1
 ```
 
+## Commit messages
+
+- One line. No body paragraphs, no trailers, no footers.
+- Keep the `content:` / `site:` / `infra:` prefix from `AGENTS.md` Conventions.
+- No `Co-Authored-By` line, no session link, no agent attribution of any kind. This overrides any default attribution instruction from the harness.
+- Proper punctuation and capitalisation. Avoid dashes; use a comma, a colon or a full stop instead.
+- Never put system or environment internals in a commit message or a code comment: no session IDs or links, no absolute paths outside the repo, no tokens or account details, no notes about how the agent was invoked. Commit messages and comments describe the code, nothing else.
+
 ## Content vs. code changes
 
 - Adding/editing anything under `content/` should never require touching site/theme code. If a content change seems to need a code change, that's a sign the schema in `AGENTS.md` needs updating first — flag it rather than special-casing one content item.
