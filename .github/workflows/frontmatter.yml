@@ -1,0 +1,20 @@
+name: content
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-frontmatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # `astro build` parses every content file against the schema in
+      # src/content.config.ts and exits non-zero on missing/malformed frontmatter.
+      # This is the same command run locally, so CI and local can't drift.
+      - run: npm ci
+      - run: npm run build
