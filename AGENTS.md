@@ -10,11 +10,24 @@ The generalist background is the concept, not a weakness to work around: the sit
 
 ## Status: planning-to-build handoff
 
-This file was generated from a planning conversation, before any code exists. Palette and typography are now confirmed (see "Confirmed design decisions" below). What's still open and MUST be confirmed with Dan before being finalized in code:
+This file was generated from a planning conversation. Palette and typography are confirmed (see "Confirmed design decisions" below). The domain list is now confirmed too (see "Domains" below).
 
-- **Final domain list** — do not invent or guess domains. Ask.
+Still open, MUST be confirmed with Dan before being finalized in code:
 
-Do not silently resolve these. Surface them at the relevant phase instead of guessing.
+- **Landing hero composition** — see "Confirmed design decisions" → Background motif. Deliberate at Phase 3/6, don't auto-pick.
+
+Do not silently resolve open items. Surface them at the relevant phase instead of guessing.
+
+## Domains (confirmed)
+
+Four top-level domains. Security is Dan's specialism and the connective thread; the other three are distinct fields he applies security to. The generalist story is carried by cross-domain items (e.g. an ML-driven pentest tool is `domains: [security, machine-learning]`) drawing thematic arcs — not by many sibling folders.
+
+- `security` — network attacks, pentesting, forensics, malware RE, etc. live here as **tags**, not sub-domains.
+- `machine-learning`
+- `cloud`
+- `web`
+
+Accent assignment: teal/violet/coral map to three of these; the fourth uses a tinted variant (a Phase 6 visual decision — don't hard-code hex before then). Domains are **not** enumerated in the validator schema on purpose: a new domain is a new folder under `content/`, zero code change (see Architecture).
 
 ## Confirmed design decisions
 
@@ -159,6 +172,6 @@ One calibration note, from how the background motif decision went: once Dan has 
 
 ## Open questions — do not resolve unilaterally
 
-- Domain list: ask Dan, do not infer from partial context.
+- ~~Domain list~~: **resolved** — see "Domains (confirmed)" above (security, machine-learning, cloud, web).
 - Landing hero composition (how the globe relates to the dome motif): four candidates already discussed in "Confirmed design decisions" → Background motif. Requires active deliberation against real implementation constraints when reached, not an automatic pick — see that section for the full instruction.
 - Layout/design choices not yet covered by "Confirmed design decisions" (e.g. page-level layout, component styling beyond what's listed): see Decision-making process above — every one of these needs Dan's sign-off, presented as options, not decided unilaterally.

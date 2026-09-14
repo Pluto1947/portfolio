@@ -38,8 +38,8 @@ npm run build
 # preview the production build locally:
 npm run preview
 
-# frontmatter validation (should mirror the CI check):
-# TBD — built in Phase 1
+# frontmatter validation (this IS the CI check — schema in src/content.config.ts):
+npm run build
 ```
 
 ## Commit messages
