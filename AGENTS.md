@@ -139,7 +139,7 @@ Work through these in order. Do not start a phase until the previous one's deliv
 ## Conventions
 
 - Slugs: kebab-case.
-- Commit prefixes: `content:` for anything under `content/`, `site:` for generator/theme code, `infra:` for CI/deploy config.
+- Commit prefixes: `content:` for anything under `content/`, `site:` for generator/theme code, `infra:` for CI/deploy config, `docs:` for project documentation (`README.md`, `AGENTS.md`, `CLAUDE.md`).
 - Every new content item must pass the CI frontmatter check before merge — do not disable or skip this check to unblock a merge.
 - Do not hand-place globe coordinates in content files — always go through `_locations.json`.
 
