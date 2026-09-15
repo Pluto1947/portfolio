@@ -166,6 +166,9 @@ const fan = [
     }
     .dom-toggle:checked ~ .submenu { display: flex; }
     .submenu li { position: static; opacity: 1; visibility: visible; transform: none; margin: 0; transition: none; }
+    /* stack under Domains — never the desktop arc-fan (which would overlap) */
+    .has-sub:hover .submenu li,
+    .has-sub:focus-within .submenu li { transform: none; opacity: 1; visibility: visible; transition: none; }
     .submenu .node { font-size: 16px; }
   }
 
