@@ -13,16 +13,29 @@ date: 2026-01-01              # YYYY-MM-DD
 summary: "One line, used as the card preview text."
 ---
 
-## Context
+<!--
+  The body renders as a collapsible outline (Logseq style):
+    - each `## heading` becomes a foldable section, collapsed on load
+    - any bullet that has sub-bullets becomes a foldable node
+    - link to another item with [[its-slug]] or [[its-slug|custom label]]
+    - emoji are welcome anywhere, e.g. ## 🧭 Context
+  Keep the four sections below. Delete this comment.
+-->
+
+## 🧭 Context
+
 One line: what this is and why it exists.
 
-## Approach
-Short. Bullets are fine.
+## 🛠️ Approach
 
-- ...
+- **A point:** its explanation.
+- **A step with detail**
+  - **Sub-point:** the detail that folds away until clicked.
 
-## Evidence
-An asciinema `.cast` or annotated screenshot(s) living next to this file. Show, don't just tell.
+## 🧪 Evidence
 
-## Takeaway
-What it showed, or what you'd do differently next time.
+- An asciinema `.cast` or annotated screenshot living next to this file. Show, do not just tell.
+
+## 💡 Takeaway
+
+- What it showed, or what you would do differently next time.
