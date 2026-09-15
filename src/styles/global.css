@@ -112,6 +112,7 @@ details[open] > .osum::before { transform: rotate(90deg); }
 .osum:hover { background: rgba(255,255,255,0.035); }
 .osum:hover::before { color: var(--accent); }
 .obul { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: box-shadow .18s, background .18s; }
+.olabel { min-width: 0; }
 details:not([open]) > .osum .obul { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent); background: var(--accent); }
 .obody { margin-left: 12px; padding-left: 18px; border-left: 1px solid var(--line); }
 
@@ -120,8 +121,11 @@ details:not([open]) > .osum .obul { box-shadow: 0 0 0 4px color-mix(in srgb, var
 .obody .onode > .osum { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 17px; color: var(--text); }
 
 .outline ul, .outline ol { list-style: none; margin: 0; padding: 0; }
-.outline li:not(.onode-li) { display: flex; align-items: baseline; gap: 10px; padding: 5px 6px; color: #c9c7e0; line-height: 1.62; }
-.outline li:not(.onode-li)::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); align-self: flex-start; margin-top: 0.58em; }
+/* Bullet is absolutely positioned, NOT a flex child: flex would turn every
+   inline link/code/bold inside the item into its own squeezed column. */
+.outline li:not(.onode-li) { position: relative; padding: 5px 6px 5px 22px; color: #c9c7e0; line-height: 1.62; }
+.outline li:not(.onode-li)::before { content: ""; position: absolute; left: 6px; top: 0.82em; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.outline a { overflow-wrap: anywhere; }
 .outline li.onode-li { display: block; }
 .outline p { margin: 4px 6px 12px; color: #dcdaee; line-height: 1.64; max-width: 68ch; }
 .outline b, .outline strong { color: #fff; font-weight: 600; }

@@ -8,11 +8,16 @@ import { visit } from 'unist-util-visit';
 const bullet = () => ({ type: 'element', tagName: 'span', properties: { className: ['obul'] }, children: [] });
 
 function makeSummary(children) {
+  // Label is wrapped in one span so inline links/code inside a heading stay
+  // inline, instead of each becoming a separate flex item of the summary.
   return {
     type: 'element',
     tagName: 'summary',
     properties: { className: ['osum'] },
-    children: [bullet(), ...children],
+    children: [
+      bullet(),
+      { type: 'element', tagName: 'span', properties: { className: ['olabel'] }, children },
+    ],
   };
 }
 

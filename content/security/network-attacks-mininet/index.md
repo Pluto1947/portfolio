@@ -34,7 +34,7 @@ A practical security lab. Build a small enterprise network in Mininet, run the c
 
 ## 🧪 Evidence
 
-- Scripts, firewall rule sets, and a slide deck live in the source repo: <https://github.com/Pluto1947/Network-attacks>.
+- Scripts, firewall rule sets, and a slide deck live in the source repo: [Pluto1947/Network-attacks](https://github.com/Pluto1947/Network-attacks).
 - Validated with `ping` loss and latency, plus Wireshark and tshark captures before and after. The SYN scan target flips from `OPEN` to `FILTERED` once the rules load.
 - 📼 Asciinema recordings of each run land in Phase 5.
 
