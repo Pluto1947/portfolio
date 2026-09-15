@@ -14,9 +14,15 @@
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.1",
     "@astrojs/mdx": "^8.0.1",
+    "animejs": "^3.2.2",
     "astro": "^7.3.2"
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/animejs": "^3.1.13",
+    "typescript": "^6.0.3"
   }
 }

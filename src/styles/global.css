@@ -1,0 +1,35 @@
+/* Aurora indigo — confirmed palette (AGENTS.md). Deliberately dark. */
+:root {
+  --base:   #0A0C18;
+  --bg:     #0F1226;
+  --panel:  #161a35;
+  --text:   #E9E7F5;
+  --muted:  #8E8BB0;               /* violet-biased grey */
+  --line:   rgba(233,231,245,0.10);
+  --teal:   #2DD4BF;               /* accent / security */
+  --violet: #A78BFA;               /* accent / machine-learning */
+  --coral:  #FB923C;               /* accent / cloud */
+  --web:    #9DA9E0;               /* placeholder tint for web until Phase 6 */
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(120% 90% at 6% 45%, rgba(45,212,191,0.08), transparent 55%),
+    radial-gradient(90% 70% at 55% 120%, rgba(167,139,250,0.10), transparent 60%),
+    var(--bg);
+  min-height: 100vh;
+}
+img { max-width: 100%; }
+
+/* site frame: nav rail on the left, content to the right */
+.stage { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; min-height: 100vh; }
+main { min-width: 0; }
+
+@media (max-width: 620px) {
+  .stage { display: block; }
+}

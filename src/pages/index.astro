@@ -1,19 +1,29 @@
 ---
-// PLACEHOLDER — Phase 0 deploy check only. Unstyled on purpose:
-// layout, palette and typography are applied in Phase 2 / Phase 6.
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>PLACEHOLDER — portfolio</title>
-	</head>
-	<body>
-		<h1>PLACEHOLDER — replace me</h1>
-		<p>Phase 0 deploy check. If you can read this on the Netlify URL, the pipeline works.</p>
-	</body>
-</html>
+<BaseLayout title="Dan — portfolio">
+  <section class="hero">
+    <span class="eyebrow">Placeholder</span>
+    <h1>The arc is the map.</h1>
+    <p>
+      Navigation is locked and live. The landing hero — globe, dome composition — and the
+      domain/content page layouts are later phases; this page exists to host the real nav.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: flex; flex-direction: column; justify-content: center; gap: 18px;
+    min-height: 100vh; padding: clamp(24px, 5vw, 72px);
+  }
+  .eyebrow { font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--teal); font-weight: 500; }
+  .hero h1 {
+    font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: clamp(30px, 5vw, 52px);
+    margin: 0; line-height: 1.06; text-wrap: balance; max-width: 14ch;
+  }
+  .hero p { color: var(--muted); max-width: 48ch; line-height: 1.6; margin: 0; font-size: 15px; }
+
+  @media (max-width: 620px) { .hero { min-height: auto; padding: 40px 22px 64px; } }
+</style>

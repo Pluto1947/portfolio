@@ -1,0 +1,260 @@
+---
+// Locked arc/constellation navigation (see design prototype sign-off).
+// Desktop: left-anchored convex arc; "Domains" fans into a nested sub-arc,
+// faint lines chain the star-dots. Mobile: top bar + solid full-screen panel.
+// Works fully with no JS; Anime.js entrance + the constellation lines are
+// progressive enhancement only.
+export interface DomainLink { slug: string; label: string; accent: string; }
+interface Props { domains?: DomainLink[]; }
+
+// ponytail: domains hard-coded to the 4 confirmed. Derive from getCollection
+// once domain pages exist (Phase 2/3) so a new folder needs no edit here.
+const {
+  domains = [
+    { slug: 'security', label: 'Security', accent: 'var(--teal)' },
+    { slug: 'machine-learning', label: 'Machine Learning', accent: 'var(--violet)' },
+    { slug: 'cloud', label: 'Cloud', accent: 'var(--coral)' },
+    { slug: 'web', label: 'Web', accent: 'var(--web)' },
+  ],
+}: Props = Astro.props;
+
+// fan offsets for the nested sub-arc (indices align with `domains`)
+const fan = [
+  { sx: 24, sy: -38 }, { sx: 36, sy: -12 }, { sx: 36, sy: 12 }, { sx: 24, sy: 38 },
+];
+---
+
+<nav aria-label="Main">
+  <svg class="constellation" aria-hidden="true"></svg>
+  <a class="brand" href="/">DAN<span class="dot">.</span></a>
+
+  <input type="checkbox" id="navtoggle" class="nav-toggle" aria-label="Toggle menu" />
+  <label for="navtoggle" class="menu-toggle"><span class="mt-ico">☰</span> Menu</label>
+
+  <ul class="arc">
+    <li style="--dx: 20px"><a class="node" href="/">Home</a></li>
+    <li class="has-sub" style="--dx: 50px">
+      <input type="checkbox" id="domtoggle" class="dom-toggle" aria-label="Toggle domains" />
+      <label class="node dom-label" for="domtoggle">Domains <span class="caret">›</span></label>
+      <ul class="submenu" aria-label="Domains">
+        {domains.map((d, i) => (
+          <li style={`--sx: ${fan[i]?.sx ?? 30}px; --sy: ${fan[i]?.sy ?? 0}px`}>
+            <a class="node" href={`/${d.slug}`} style={`--accent: ${d.accent}`}>{d.label}</a>
+          </li>
+        ))}
+      </ul>
+    </li>
+    <li style="--dx: 50px"><a class="node" href="/about">About</a></li>
+    <li style="--dx: 20px"><a class="node" href="/contact">Contact</a></li>
+  </ul>
+</nav>
+
+<style is:global>
+  nav[aria-label="Main"] { position: relative; display: flex; align-items: center; padding-left: clamp(20px, 4vw, 56px); }
+
+  .brand {
+    position: absolute; top: 28px; left: clamp(20px, 4vw, 56px);
+    font-family: "Space Grotesk", sans-serif; font-weight: 600;
+    letter-spacing: 0.14em; font-size: 15px; color: var(--text); text-decoration: none;
+  }
+  .brand .dot { color: var(--teal); }
+
+  /* checkboxes drive the mobile menu + Domains accordion with no JS */
+  .nav-toggle, .dom-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .menu-toggle { display: none; }
+  .dom-label { cursor: pointer; }
+  .dom-toggle:focus-visible + .dom-label { outline: 2px solid var(--text); outline-offset: 3px; }
+  .dom-toggle:checked ~ .dom-label .caret { transform: rotate(90deg); }
+
+  /* constellation: faint lines chaining the star-dots (drawn by script) */
+  .constellation { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: visible; }
+  .constellation path, .constellation line { fill: none; stroke: rgba(176,196,230,0.30); stroke-width: 1; stroke-linecap: round; }
+  .c-chain { opacity: .5; }
+  .c-branch { opacity: 0; transition: opacity .35s ease; }
+  .constellation.branch-on .c-branch { opacity: .8; }
+
+  @keyframes navTwinkle { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+  .node::before { animation: navTwinkle 4.5s ease-in-out infinite; }
+  .arc > li:nth-child(2) .node::before { animation-delay: .9s; }
+  .arc > li:nth-child(3) .node::before { animation-delay: 1.8s; }
+  .arc > li:nth-child(4) .node::before { animation-delay: 2.7s; }
+  .submenu li:nth-child(2) .node::before { animation-delay: .6s; }
+  .submenu li:nth-child(3) .node::before { animation-delay: 1.2s; }
+  .submenu li:nth-child(4) .node::before { animation-delay: 1.8s; }
+
+  .arc { list-style: none; margin: 0; padding: 0; position: relative; z-index: 1; }
+  .arc > li {
+    position: relative;
+    transform: translateX(var(--dx, 0));   /* convex arc offset */
+    margin: 14px 0;
+    transition: opacity .35s ease, filter .35s ease, transform .35s ease;
+  }
+  /* when Domains opens, the rest of the arc recedes out of focus */
+  .arc:has(.has-sub:hover) > li:not(.has-sub),
+  .arc:has(.has-sub:focus-within) > li:not(.has-sub) {
+    opacity: .22; filter: blur(1.6px);
+    transform: translateX(calc(var(--dx, 0) - 6px)) scale(.98);
+  }
+  .node {
+    display: inline-flex; align-items: center; gap: 12px; padding: 5px 2px;
+    font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: 17px; letter-spacing: 0.005em;
+    color: var(--text); text-decoration: none; position: relative;
+    transition: color .25s ease, transform .25s ease; white-space: nowrap;
+  }
+  .node::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%; flex: none;
+    background: var(--accent, var(--muted));
+    box-shadow: 0 0 0 0 var(--accent, transparent);
+    transition: box-shadow .3s ease, transform .3s ease;
+  }
+  .node:hover, .node:focus-visible { transform: translateX(6px); color: #fff; outline: none; }
+  .node:hover::before, .node:focus-visible::before { box-shadow: 0 0 12px 2px var(--accent, transparent); transform: scale(1.35); }
+  .node:focus-visible { text-decoration: underline; text-underline-offset: 6px; }
+  .caret { color: var(--muted); font-size: 13px; margin-left: 1px; transition: transform .3s ease, color .25s ease; }
+  .node:hover .caret { color: var(--text); }
+
+  /* nested Domains sub-arc */
+  .has-sub { position: relative; }
+  .submenu { list-style: none; margin: 0; padding: 0; position: absolute; left: 100%; top: 50%; }
+  .submenu li {
+    position: absolute; left: 12px; top: -14px;
+    transform: translate(-14px, 0) scale(0.9); opacity: 0; visibility: hidden;
+    transition: transform .38s cubic-bezier(.2,.8,.2,1), opacity .3s ease, visibility 0s .38s;
+  }
+  .has-sub:hover .submenu li,
+  .has-sub:focus-within .submenu li {
+    transform: translate(var(--sx), var(--sy)) scale(1); opacity: 1; visibility: visible;
+    transition: transform .42s cubic-bezier(.2,.8,.2,1), opacity .28s ease;
+  }
+  .has-sub:hover .caret, .has-sub:focus-within .caret { transform: rotate(90deg); }
+  .submenu li:nth-child(1) { transition-delay: .00s; }
+  .submenu li:nth-child(2) { transition-delay: .05s; }
+  .submenu li:nth-child(3) { transition-delay: .10s; }
+  .submenu li:nth-child(4) { transition-delay: .15s; }
+  .submenu .node { font-size: 15px; }
+
+  @media (max-width: 620px) {
+    .constellation { display: none; }
+    /* top bar: brand left, Menu top-right. NO backdrop-filter — a filtered
+       ancestor would trap the fixed panel and let content show through. */
+    nav[aria-label="Main"] {
+      position: sticky; top: 0; z-index: 30;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 22px; background: var(--base); border-bottom: 1px solid var(--line);
+    }
+    .brand { position: static; top: auto; left: auto; }
+    .menu-toggle {
+      display: inline-flex; align-items: center; gap: 9px; cursor: pointer;
+      font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: 15px; letter-spacing: 0.04em;
+      color: var(--text); padding: 0;
+    }
+    .menu-toggle .mt-ico { color: var(--teal); font-size: 14px; transition: transform .3s ease; }
+    .nav-toggle:checked ~ .menu-toggle .mt-ico { transform: rotate(90deg); }
+    .nav-toggle:focus-visible + .menu-toggle { outline: 2px solid var(--teal); outline-offset: 3px; }
+    /* opened menu = solid full-screen panel */
+    .arc { display: none; }
+    .nav-toggle:checked ~ .arc {
+      display: flex; flex-direction: column; gap: 4px;
+      position: fixed; inset: 0; z-index: 20;
+      margin: 0; padding: 92px 26px 40px; background: var(--base); overflow-y: auto;
+    }
+    .arc > li { transform: none !important; opacity: 1 !important; filter: none !important; margin: 9px 0; }
+    .node { font-size: 20px; }
+    .submenu {
+      position: static; margin: 12px 0 6px 19px; padding-left: 18px; border-left: 1px solid var(--line);
+      display: none; flex-direction: column; gap: 15px;
+    }
+    .dom-toggle:checked ~ .submenu { display: flex; }
+    .submenu li { position: static; opacity: 1; visibility: visible; transform: none; margin: 0; transition: none; }
+    .submenu .node { font-size: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    nav[aria-label="Main"] * { transition: none !important; animation: none !important; }
+    .node { transform: none !important; }
+  }
+</style>
+
+<script>
+  import anime from 'animejs';
+
+  const nav = document.querySelector('nav[aria-label="Main"]') as HTMLElement | null;
+  const svg = nav?.querySelector('.constellation') as SVGSVGElement | null;
+  if (nav && svg) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const topNodes = [...nav.querySelectorAll<HTMLElement>('.arc > li > .node')];
+    const hasSub = nav.querySelector('.has-sub') as HTMLElement;
+    const domNode = hasSub.querySelector('.dom-label') as HTMLElement;
+    const domainNodes = [...hasSub.querySelectorAll<HTMLElement>('.submenu .node')];
+
+    const chain = document.createElementNS(NS, 'path');
+    chain.setAttribute('class', 'c-chain');
+    svg.appendChild(chain);
+    const branches = domainNodes.map(() => {
+      const l = document.createElementNS(NS, 'line');
+      l.setAttribute('class', 'c-branch');
+      svg.appendChild(l);
+      return l;
+    });
+
+    const dot = (el: HTMLElement) => {
+      const o = nav.getBoundingClientRect(), r = el.getBoundingClientRect();
+      return { x: r.left - o.left + 5, y: r.top - o.top + r.height / 2 };
+    };
+
+    // Catmull-Rom → smooth cubic curve flowing through the star-dots
+    const smoothPath = (pts: { x: number; y: number }[]) => {
+      if (pts.length < 3) return 'M ' + pts.map((p) => `${p.x} ${p.y}`).join(' L ');
+      let d = `M ${pts[0].x} ${pts[0].y}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+        d += ` C ${p1.x + (p2.x - p0.x) / 6} ${p1.y + (p2.y - p0.y) / 6}, ${p2.x - (p3.x - p1.x) / 6} ${p2.y - (p3.y - p1.y) / 6}, ${p2.x} ${p2.y}`;
+      }
+      return d;
+    };
+
+    const draw = () => {
+      const o = nav.getBoundingClientRect();
+      svg.setAttribute('viewBox', `0 0 ${o.width} ${o.height}`);
+      const visible = topNodes[0].getBoundingClientRect().width > 0;
+      svg.style.opacity = visible ? '1' : '0';
+      if (!visible) return;
+      chain.setAttribute('d', smoothPath(topNodes.map(dot)));
+      const d = dot(domNode);
+      domainNodes.forEach((n, i) => {
+        const p = dot(n);
+        branches[i].setAttribute('x1', String(d.x)); branches[i].setAttribute('y1', String(d.y));
+        branches[i].setAttribute('x2', String(p.x)); branches[i].setAttribute('y2', String(p.y));
+      });
+    };
+
+    let tracking = false;
+    const follow = (ms: number) => {
+      const end = performance.now() + ms;
+      (function step() { draw(); if (tracking || performance.now() < end) requestAnimationFrame(step); })();
+    };
+    const openBranch = () => { svg.classList.add('branch-on'); tracking = true; follow(600); };
+    const closeBranch = () => { svg.classList.remove('branch-on'); tracking = false; requestAnimationFrame(() => follow(500)); };
+
+    hasSub.addEventListener('mouseenter', openBranch);
+    hasSub.addEventListener('mouseleave', closeBranch);
+    hasSub.addEventListener('focusin', openBranch);
+    hasSub.addEventListener('focusout', (e) => { if (!hasSub.contains(e.relatedTarget as Node)) closeBranch(); });
+    document.getElementById('domtoggle')?.addEventListener('change', (e) => (e.target as HTMLInputElement).checked ? openBranch() : closeBranch());
+    document.getElementById('navtoggle')?.addEventListener('change', () => follow(500));
+    window.addEventListener('resize', () => requestAnimationFrame(draw));
+    window.addEventListener('load', () => follow(300));
+    draw();
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      topNodes.forEach((n) => { n.style.opacity = '0'; });
+      anime({
+        targets: '.arc > li > .node',
+        translateX: [-46, 0], opacity: [0, 1],
+        easing: 'easeOutCubic', duration: 620,
+        delay: anime.stagger(90, { start: 180 }),
+        update: draw, complete: draw,
+      });
+    }
+  }
+</script>
