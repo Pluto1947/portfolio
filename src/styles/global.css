@@ -13,6 +13,9 @@
 }
 
 * { box-sizing: border-box; }
+/* Author rules like `display:flex` outrank the UA's [hidden] rule, which
+   silently breaks any element we hide via the hidden property. Enforce it once. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
