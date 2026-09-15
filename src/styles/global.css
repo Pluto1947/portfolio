@@ -40,6 +40,14 @@ main { min-width: 0; }
 .page .eyebrow .dom { color: var(--accent); }
 .page .eyebrow .dom::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px 1px var(--accent); margin-right: 7px; vertical-align: middle; }
 .page .lead { color: var(--muted); max-width: 58ch; line-height: 1.6; margin: 14px 0 0; font-size: 15px; }
+
+/* domain header: counts and topic chips instead of a paragraph */
+.dhead { margin-top: 26px; }
+.dmeta { display: flex; flex-wrap: wrap; gap: 18px; margin: 16px 0 0; }
+.stat { color: var(--muted); font-size: 12.5px; letter-spacing: 0.02em; }
+.stat b { color: var(--text); font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; margin-right: 5px; }
+.chips.topics { margin-top: 16px; }
+.chips.topics .chip { font-size: 12px; padding: 4px 10px; }
 .subline { color: var(--muted); font-size: 13.5px; margin: 14px 0 0; font-variant-numeric: tabular-nums; }
 .back { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); text-decoration: none; font-size: 13px; font-family: "Space Grotesk", sans-serif; letter-spacing: 0.03em; }
 .back:hover { color: var(--text); }

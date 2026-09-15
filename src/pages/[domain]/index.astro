@@ -2,8 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Title from '../../components/Title.astro';
 import {
-  getDomains, itemsInDomain, groupByType, typeLabel,
-  connectedDomainsForDomain, accentFor, labelFor, descFor,
+  getDomains, itemsInDomain, groupByType, typeLabel, topicsInDomain,
+  connectedDomainsForDomain, accentFor, labelFor,
 } from '../../lib/graph';
 
 export async function getStaticPaths() {
@@ -14,6 +14,7 @@ export async function getStaticPaths() {
 const { domain } = Astro.params;
 const items = await itemsInDomain(domain);
 const groups = groupByType(items);
+const topics = await topicsInDomain(domain);
 const connected = await connectedDomainsForDomain(domain);
 const accent = accentFor(domain);
 const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
@@ -22,12 +23,22 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
 <BaseLayout title={`${labelFor(domain)} — Dan`}>
   <div class="page" style={`--accent:${accent}`}>
     <a class="back" href="/">‹ Home</a>
-    <span class="eyebrow" style="margin-top:26px;display:inline-flex">Domain</span>
-    <Title text={labelFor(domain)} accent={accent} />
-    {descFor(domain) && <p class="lead">{descFor(domain)}</p>}
+
+    <header class="dhead">
+      <Title text={labelFor(domain)} accent={accent} />
+      <div class="dmeta">
+        <span class="stat"><b>{items.length}</b> {items.length === 1 ? 'item' : 'items'}</span>
+        {groups.map((g) => (
+          <span class="stat"><b>{g.items.length}</b> {typeLabel(g.type).toLowerCase()}</span>
+        ))}
+      </div>
+      {topics.length > 0 && (
+        <div class="chips topics">{topics.map((t) => <span class="chip">{t.tag}</span>)}</div>
+      )}
+    </header>
 
     <div class="cols">
-      <main>
+      <div class="listcol">
         {groups.length === 0 && <p class="empty">No content here yet.</p>}
         {groups.map((g) => (
           <section class="group">
@@ -41,7 +52,7 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
             ))}
           </section>
         ))}
-      </main>
+      </div>
 
       <aside class="rail">
         {connected.length > 0 && (
@@ -52,7 +63,7 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
                 {labelFor(c.domain)}<span class="n">{c.count}</span>
               </a>
             ))}
-            <p class="railnote">Domains these items also belong to. Cross-domain work links them.</p>
+            <p class="railnote">Domains these items also belong to.</p>
           </div>
         )}
       </aside>

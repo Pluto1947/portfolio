@@ -231,13 +231,20 @@ const fan = [
       });
     };
 
-    let tracking = false;
+    // Hovering any node nudges it sideways, so the chain has to keep re-measuring
+    // while the pointer is anywhere over the nav, not only while Domains is open.
+    let hoverNav = false;
+    let branchOpen = false;
+    const active = () => hoverNav || branchOpen;
     const follow = (ms: number) => {
       const end = performance.now() + ms;
-      (function step() { draw(); if (tracking || performance.now() < end) requestAnimationFrame(step); })();
+      (function step() { draw(); if (active() || performance.now() < end) requestAnimationFrame(step); })();
     };
-    const openBranch = () => { svg.classList.add('branch-on'); tracking = true; follow(600); };
-    const closeBranch = () => { svg.classList.remove('branch-on'); tracking = false; requestAnimationFrame(() => follow(500)); };
+    const openBranch = () => { svg.classList.add('branch-on'); branchOpen = true; follow(600); };
+    const closeBranch = () => { svg.classList.remove('branch-on'); branchOpen = false; requestAnimationFrame(() => follow(500)); };
+
+    nav.addEventListener('pointerenter', () => { hoverNav = true; follow(400); });
+    nav.addEventListener('pointerleave', () => { hoverNav = false; requestAnimationFrame(() => follow(400)); });
 
     hasSub.addEventListener('mouseenter', openBranch);
     hasSub.addEventListener('mouseleave', closeBranch);

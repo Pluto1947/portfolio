@@ -32,11 +32,15 @@ const DOMAIN_LABEL: Record<string, string> = {
 };
 export const labelFor = (d: string) => DOMAIN_LABEL[d] ?? d;
 
-const DOMAIN_DESC: Record<string, string> = {
-  security:
-    'Offensive and defensive security: network attacks, pentesting, forensics, malware reverse engineering. The thread that runs through everything.',
-};
-export const descFor = (d: string) => DOMAIN_DESC[d] ?? '';
+// Topic chips for a domain, taken from the real tags on its items.
+export async function topicsInDomain(domain: string): Promise<{ tag: string; count: number }[]> {
+  const items = await itemsInDomain(domain);
+  const counts = new Map<string, number>();
+  for (const it of items) for (const t of it.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
+  return [...counts.entries()]
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+}
 
 export const locationLabel = (slug?: string): string | null => {
   if (!slug) return null;
