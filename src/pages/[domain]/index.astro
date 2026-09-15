@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Title from '../../components/Title.astro';
+import {
+  getDomains, itemsInDomain, groupByType, typeLabel,
+  connectedDomainsForDomain, accentFor, labelFor, descFor,
+} from '../../lib/graph';
+
+export async function getStaticPaths() {
+  const domains = await getDomains();
+  return domains.map((domain) => ({ params: { domain } }));
+}
+
+const { domain } = Astro.params;
+const items = await itemsInDomain(domain);
+const groups = groupByType(items);
+const connected = await connectedDomainsForDomain(domain);
+const accent = accentFor(domain);
+const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
+---
+
+<BaseLayout title={`${labelFor(domain)} — Dan`}>
+  <div class="page" style={`--accent:${accent}`}>
+    <a class="back" href="/">‹ Home</a>
+    <span class="eyebrow" style="margin-top:26px;display:inline-flex">Domain</span>
+    <Title text={labelFor(domain)} accent={accent} />
+    {descFor(domain) && <p class="lead">{descFor(domain)}</p>}
+
+    <div class="cols">
+      <main>
+        {groups.length === 0 && <p class="empty">No content here yet.</p>}
+        {groups.map((g) => (
+          <section class="group">
+            <div class="ghead"><span class="gname">{typeLabel(g.type)}</span><span class="gcount">{g.items.length}</span></div>
+            {g.items.map((it) => (
+              <a class="grow" href={it.url}>
+                <h3>{it.data.title}</h3>
+                <span class="gmeta">{fmt(it.data.date)}</span>
+                <p class="gsum">{it.data.summary}</p>
+              </a>
+            ))}
+          </section>
+        ))}
+      </main>
+
+      <aside class="rail">
+        {connected.length > 0 && (
+          <div class="panel">
+            <p class="ptitle">Connected domains</p>
+            {connected.map((c) => (
+              <a class="rlink" href={`/${c.domain}`} style={`--d:${accentFor(c.domain)}`}>
+                {labelFor(c.domain)}<span class="n">{c.count}</span>
+              </a>
+            ))}
+            <p class="railnote">Domains these items also belong to. Cross-domain work links them.</p>
+          </div>
+        )}
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

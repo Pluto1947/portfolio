@@ -1,0 +1,35 @@
+---
+// CRT scanline title (confirmed site-wide treatment). Glow + sweep take the
+// page's domain accent; scanlines and the magenta/cyan edges stay constant.
+interface Props { text: string; accent?: string; as?: 'h1' | 'h2'; }
+const { text, accent = 'var(--teal)', as = 'h1' } = Astro.props;
+const Tag = as;
+---
+
+<div class="vC-wrap" style={`--title-accent:${accent}`}>
+  <Tag class="vC">{text}</Tag>
+</div>
+
+<style is:global>
+  .vC-wrap { position: relative; overflow: hidden; width: max-content; max-width: 100%; }
+  .vC {
+    position: relative; margin: 0;
+    font-family: "Space Grotesk", sans-serif; font-weight: 700; line-height: 1.06;
+    color: #dbfff7;
+    text-shadow:
+      0 0 10px color-mix(in srgb, var(--title-accent, var(--teal)) 55%, transparent),
+      1px 0 rgba(255, 77, 141, 0.5), -1px 0 rgba(34, 233, 255, 0.5);
+  }
+  .vC::after {
+    content: ""; position: absolute; inset: -6px 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.34) 0 1px, transparent 1px 3px);
+    mix-blend-mode: multiply;
+  }
+  .vC-wrap::after {
+    content: ""; position: absolute; left: 0; right: 0; height: 38%; top: -40%; pointer-events: none;
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--title-accent, var(--teal)) 16%, transparent), transparent);
+    animation: title-sweep 4.5s linear infinite;
+  }
+  @keyframes title-sweep { 0% { top: -45%; } 100% { top: 115%; } }
+  @media (prefers-reduced-motion: reduce) { .vC-wrap::after { display: none; } }
+</style>

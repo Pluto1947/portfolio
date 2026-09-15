@@ -1,0 +1,90 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Title from '../../components/Title.astro';
+import {
+  getItems, backlinksFor, relatedFor, connectedDomainsForItem,
+  accentFor, labelFor, typeLabel, locationLabel, type Item,
+} from '../../lib/graph';
+
+export async function getStaticPaths() {
+  const items = await getItems();
+  return items.map((item) => ({ params: { domain: item.domain, slug: item.slug }, props: { item } }));
+}
+
+const { item } = Astro.props as { item: Item };
+const { Content } = await render(item.entry);
+
+const accent = accentFor(item.domain);
+const backlinks = await backlinksFor(item.slug);
+const related = await relatedFor(item);
+const connected = await connectedDomainsForItem(item);
+const locLabel = locationLabel(item.data.location);
+const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
+---
+
+<BaseLayout title={`${item.data.title} — Dan`}>
+  <div class="page" style={`--accent:${accent}`}>
+    <a class="back" href={`/${item.domain}`}>‹ {labelFor(item.domain)}</a>
+
+    <div class="cols">
+      <article>
+        <p class="eyebrow" style="margin-top:22px">
+          <span>{typeLabel(item.data.type)}</span> · <span class="dom">{labelFor(item.domain)}</span>
+        </p>
+        <Title text={item.data.title} accent={accent} />
+        <p class="subline">{fmt(item.data.date)}{locLabel ? ` · ${locLabel}` : ''}</p>
+
+        <div class="outline"><Content /></div>
+      </article>
+
+      <aside class="rail">
+        <div class="panel">
+          <p class="ptitle">Details</p>
+          <dl class="kv">
+            <dt>Type</dt><dd>{typeLabel(item.data.type)}</dd>
+            <dt>Date</dt><dd>{fmt(item.data.date)}</dd>
+            {locLabel && (<><dt>Location</dt><dd>{locLabel}</dd></>)}
+            <dt>Domains</dt>
+            <dd><span class="chips">{item.domains.map((d) => (
+              <a class="chip dom" href={`/${d}`} style={`--d:${accentFor(d)}`}>{labelFor(d)}</a>
+            ))}</span></dd>
+          </dl>
+          {item.tags.length > 0 && (
+            <div class="chips" style="margin-top:14px">{item.tags.map((t) => <span class="chip">{t}</span>)}</div>
+          )}
+        </div>
+
+        {backlinks.length > 0 && (
+          <div class="panel">
+            <p class="ptitle">Linked from</p>
+            {backlinks.map((b) => (
+              <><a class="rlink" href={b.url} style={`--d:${accentFor(b.domain)}`}>{b.data.title}</a>
+                <div class="rsub">{labelFor(b.domain)}</div></>
+            ))}
+          </div>
+        )}
+
+        {connected.length > 0 && (
+          <div class="panel">
+            <p class="ptitle">Connected domains</p>
+            {connected.map((c) => (
+              <a class="rlink" href={`/${c.domain}`} style={`--d:${accentFor(c.domain)}`}>
+                {labelFor(c.domain)}<span class="n">{c.count}</span>
+              </a>
+            ))}
+          </div>
+        )}
+
+        {related.length > 0 && (
+          <div class="panel">
+            <p class="ptitle">Related</p>
+            {related.map((r) => (
+              <a class="rlink" href={r.url} style={`--d:${accentFor(r.domain)}`}>{r.data.title}</a>
+            ))}
+          </div>
+        )}
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

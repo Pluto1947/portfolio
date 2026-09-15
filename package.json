@@ -12,10 +12,12 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.1",
     "@astrojs/markdown-satteri": "^0.4.1",
     "@astrojs/mdx": "^8.0.1",
     "animejs": "^3.2.2",
-    "astro": "^7.3.2"
+    "astro": "^7.3.2",
+    "unist-util-visit": "^5.1.0"
   },
   "allowScripts": {
     "esbuild": true
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@types/animejs": "^3.1.13",
+    "@types/node": "^26.6.0",
     "typescript": "^6.0.3"
   }
 }
