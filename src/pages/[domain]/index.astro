@@ -33,24 +33,30 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
         ))}
       </div>
       {topics.length > 0 && (
-        <div class="chips topics">{topics.map((t) => <span class="chip">{t.tag}</span>)}</div>
+        <div class="chips topics">
+          {topics.map((t) => <button class="chip" type="button" data-tag={t.tag}>{t.tag}</button>)}
+        </div>
       )}
+      <div class="filterbar">
+        <span class="fnote" id="fnote" hidden></span>
+        <button class="fclear" id="fclear" type="button" hidden>clear filter</button>
+      </div>
     </header>
 
     <div class="cols">
       <div class="listcol">
         {groups.length === 0 && <p class="empty">No content here yet.</p>}
         {groups.map((g) => (
-          <section class="group">
-            <div class="ghead"><span class="gname">{typeLabel(g.type)}</span><span class="gcount">{g.items.length}</span></div>
+          <details class="group" open>
+            <summary class="ghead"><span class="gname">{typeLabel(g.type)}</span><span class="gcount">{g.items.length}</span></summary>
             {g.items.map((it) => (
-              <a class="grow" href={it.url}>
+              <a class="grow" href={it.url} data-slug={it.slug} data-tags={it.tags.join(' ')}>
                 <h3>{it.data.title}</h3>
                 <span class="gmeta">{fmt(it.data.date)}</span>
                 <p class="gsum">{it.data.summary}</p>
               </a>
             ))}
-          </section>
+          </details>
         ))}
       </div>
 
@@ -70,3 +76,44 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  // Live tag filtering: click a topic chip to filter the list, click again to clear.
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chips.topics .chip')];
+  const rows = [...document.querySelectorAll<HTMLAnchorElement>('.grow')];
+  const groups = [...document.querySelectorAll<HTMLDetailsElement>('details.group')];
+  const note = document.getElementById('fnote') as HTMLElement | null;
+  const clearBtn = document.getElementById('fclear') as HTMLElement | null;
+  let active: string | null = null;
+
+  function apply() {
+    let shown = 0;
+    for (const row of rows) {
+      const tags = (row.dataset.tags || '').split(' ').filter(Boolean);
+      const match = !active || tags.includes(active);
+      row.hidden = !match;
+      if (match) shown++;
+    }
+    for (const g of groups) {
+      const visible = [...g.querySelectorAll<HTMLElement>('.grow')].filter((r) => !r.hidden).length;
+      g.hidden = visible === 0;
+      const count = g.querySelector('.gcount');
+      if (count) count.textContent = String(visible);
+      if (visible > 0) g.open = true;
+    }
+    for (const c of chips) c.classList.toggle('is-active', c.dataset.tag === active);
+    if (note) {
+      note.hidden = !active;
+      note.textContent = active ? `${shown} ${shown === 1 ? 'item' : 'items'} tagged “${active}”` : '';
+    }
+    if (clearBtn) clearBtn.hidden = !active;
+  }
+
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      active = active === chip.dataset.tag ? null : chip.dataset.tag ?? null;
+      apply();
+    });
+  }
+  clearBtn?.addEventListener('click', () => { active = null; apply(); });
+</script>

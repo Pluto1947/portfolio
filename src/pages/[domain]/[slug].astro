@@ -59,7 +59,7 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
           <div class="panel">
             <p class="ptitle">Linked from</p>
             {backlinks.map((b) => (
-              <><a class="rlink" href={b.url} style={`--d:${accentFor(b.domain)}`}>{b.data.title}</a>
+              <><a class="rlink" href={b.url} data-slug={b.slug} style={`--d:${accentFor(b.domain)}`}>{b.data.title}</a>
                 <div class="rsub">{labelFor(b.domain)}</div></>
             ))}
           </div>
@@ -80,7 +80,7 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
           <div class="panel">
             <p class="ptitle">Related</p>
             {related.map((r) => (
-              <a class="rlink" href={r.url} style={`--d:${accentFor(r.domain)}`}>{r.data.title}</a>
+              <a class="rlink" href={r.url} data-slug={r.slug} style={`--d:${accentFor(r.domain)}`}>{r.data.title}</a>
             ))}
           </div>
         )}

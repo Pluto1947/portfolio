@@ -1,0 +1,151 @@
+---
+// Site-wide interactions: hover preview cards and the cmd+K quick search.
+// Both read one small JSON index emitted below, so they work on every page.
+import { getItems, labelFor, typeLabel, accentFor } from '../lib/graph';
+
+const items = await getItems();
+const index = items.map((i) => ({
+  slug: i.slug,
+  url: i.url,
+  title: i.data.title,
+  type: typeLabel(i.data.type),
+  summary: i.data.summary,
+  domain: labelFor(i.domain),
+  accent: accentFor(i.domain),
+  tags: i.tags,
+}));
+---
+
+<script type="application/json" id="site-index" set:html={JSON.stringify(index)}></script>
+
+<div id="preview" class="preview" hidden></div>
+
+<div id="qs" class="qs" hidden>
+  <div class="qs-box" role="dialog" aria-label="Quick search">
+    <input id="qs-input" type="text" placeholder="Search titles and tags" autocomplete="off" spellcheck="false" />
+    <ul id="qs-results" class="qs-results"></ul>
+    <p class="qs-hint"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>enter</kbd> open · <kbd>esc</kbd> close</p>
+  </div>
+</div>
+
+<style is:global>
+  /* ---- hover preview card ---- */
+  .preview {
+    position: fixed; z-index: 90; width: 300px; max-width: calc(100vw - 24px);
+    padding: 14px 16px; border: 1px solid var(--line); border-radius: 13px;
+    background: rgba(13,16,34,0.97); box-shadow: 0 24px 50px -28px rgba(0,0,0,0.95);
+    pointer-events: none; opacity: 0; transition: opacity .14s ease;
+  }
+  .preview.show { opacity: 1; }
+  .preview .pv-top { display: flex; align-items: center; gap: 8px; font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-family: "Space Grotesk", sans-serif; }
+  .preview .pv-top::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--pv, var(--muted)); box-shadow: 0 0 8px 0 var(--pv, transparent); flex: none; }
+  .preview .pv-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 15px; color: var(--text); margin: 8px 0 6px; line-height: 1.25; }
+  .preview .pv-sum { color: var(--muted); font-size: 12.5px; line-height: 1.5; margin: 0; }
+
+  /* ---- quick search ---- */
+  .qs { position: fixed; inset: 0; z-index: 100; background: rgba(6,8,18,0.72); display: flex; justify-content: center; padding: 12vh 18px 0; }
+  .qs-box { width: 100%; max-width: 560px; border: 1px solid var(--line); border-radius: 16px; background: rgba(13,16,34,0.99); box-shadow: 0 40px 80px -40px #000; overflow: hidden; height: max-content; }
+  #qs-input { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--text); font-family: "Space Grotesk", sans-serif; font-size: 17px; padding: 18px 20px; outline: none; }
+  #qs-input::placeholder { color: var(--muted); }
+  .qs-results { list-style: none; margin: 0; padding: 6px; max-height: 46vh; overflow-y: auto; }
+  .qs-results li a { display: block; padding: 10px 14px; border-radius: 9px; text-decoration: none; color: var(--text); }
+  .qs-results li.sel a, .qs-results li a:hover { background: rgba(255,255,255,0.06); }
+  .qs-results .r-title { font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: 14.5px; }
+  .qs-results .r-meta { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .qs-results .r-meta::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--rd, var(--muted)); margin-right: 7px; vertical-align: middle; }
+  .qs-empty { color: var(--muted); font-size: 13px; padding: 16px 14px; }
+  .qs-hint { margin: 0; padding: 10px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+  .qs-hint kbd { border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; margin-right: 3px; font-family: "Space Grotesk", sans-serif; font-size: 10px; }
+</style>
+
+<script>
+  type Row = { slug: string; url: string; title: string; type: string; summary: string; domain: string; accent: string; tags: string[] };
+  const el = document.getElementById('site-index');
+  const INDEX: Row[] = el ? JSON.parse(el.textContent || '[]') : [];
+  const bySlug = new Map(INDEX.map((r) => [r.slug, r]));
+
+  /* ---------- hover preview ---------- */
+  const pv = document.getElementById('preview') as HTMLElement | null;
+  if (pv) {
+    let timer: number | undefined;
+    const hide = () => { pv.classList.remove('show'); pv.hidden = true; };
+
+    const show = (link: HTMLAnchorElement, row: Row) => {
+      pv.innerHTML =
+        `<p class="pv-top" style="--pv:${row.accent}">${row.type} · ${row.domain}</p>` +
+        `<p class="pv-title"></p><p class="pv-sum"></p>`;
+      (pv.querySelector('.pv-title') as HTMLElement).textContent = row.title;
+      (pv.querySelector('.pv-sum') as HTMLElement).textContent = row.summary;
+      pv.hidden = false;
+      const r = link.getBoundingClientRect();
+      const w = 300;
+      let left = r.left;
+      if (left + w > window.innerWidth - 12) left = window.innerWidth - w - 12;
+      let top = r.bottom + 10;
+      if (top + pv.offsetHeight > window.innerHeight - 12) top = Math.max(12, r.top - pv.offsetHeight - 10);
+      pv.style.left = `${Math.max(12, left)}px`;
+      pv.style.top = `${top}px`;
+      requestAnimationFrame(() => pv.classList.add('show'));
+    };
+
+    document.addEventListener('mouseover', (e) => {
+      const link = (e.target as HTMLElement)?.closest?.('a[data-slug], a[data-wikilink]') as HTMLAnchorElement | null;
+      if (!link) return;
+      const slug = link.dataset.slug || link.dataset.wikilink;
+      const row = slug ? bySlug.get(slug) : undefined;
+      if (!row) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => show(link, row), 220);
+    });
+    document.addEventListener('mouseout', (e) => {
+      const link = (e.target as HTMLElement)?.closest?.('a[data-slug], a[data-wikilink]');
+      if (!link) return;
+      window.clearTimeout(timer);
+      hide();
+    });
+    window.addEventListener('scroll', hide, { passive: true });
+  }
+
+  /* ---------- quick search (cmd/ctrl + K) ---------- */
+  const qs = document.getElementById('qs') as HTMLElement | null;
+  const input = document.getElementById('qs-input') as HTMLInputElement | null;
+  const results = document.getElementById('qs-results') as HTMLElement | null;
+
+  if (qs && input && results) {
+    let sel = 0;
+    let rows: Row[] = [];
+
+    const render = () => {
+      const q = input.value.trim().toLowerCase();
+      rows = !q
+        ? INDEX.slice(0, 8)
+        : INDEX.filter(
+            (r) => r.title.toLowerCase().includes(q) || r.tags.some((t) => t.toLowerCase().includes(q)) || r.domain.toLowerCase().includes(q),
+          ).slice(0, 10);
+      sel = 0;
+      if (!rows.length) { results.innerHTML = '<li class="qs-empty">Nothing matches.</li>'; return; }
+      results.innerHTML = rows
+        .map((r, i) => `<li class="${i === 0 ? 'sel' : ''}"><a href="${r.url}"><div class="r-title"></div><div class="r-meta" style="--rd:${r.accent}">${r.type} · ${r.domain}</div></a></li>`)
+        .join('');
+      results.querySelectorAll('.r-title').forEach((n, i) => { (n as HTMLElement).textContent = rows[i].title; });
+    };
+
+    const mark = () => {
+      results.querySelectorAll('li').forEach((li, i) => li.classList.toggle('sel', i === sel));
+      results.querySelectorAll('li')[sel]?.scrollIntoView({ block: 'nearest' });
+    };
+    const open = () => { qs.hidden = false; input.value = ''; render(); input.focus(); };
+    const close = () => { qs.hidden = true; };
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); qs.hidden ? open() : close(); return; }
+      if (qs.hidden) return;
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, rows.length - 1); mark(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(sel - 1, 0); mark(); }
+      else if (e.key === 'Enter' && rows[sel]) { e.preventDefault(); window.location.href = rows[sel].url; }
+    });
+    input.addEventListener('input', render);
+    qs.addEventListener('click', (e) => { if (e.target === qs) close(); });
+  }
+</script>
