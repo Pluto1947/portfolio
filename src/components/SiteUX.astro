@@ -22,7 +22,10 @@ const index = items.map((i) => ({
 
 <div id="qs" class="qs" hidden>
   <div class="qs-box" role="dialog" aria-label="Quick search">
-    <input id="qs-input" type="text" placeholder="Search titles and tags" autocomplete="off" spellcheck="false" />
+    <div class="qs-field">
+      <input id="qs-input" type="text" placeholder="Search titles and tags" autocomplete="off" spellcheck="false" />
+      <button id="qs-close" class="qs-close" type="button" aria-label="Close search">&#215;</button>
+    </div>
     <ul id="qs-results" class="qs-results"></ul>
     <p class="qs-hint"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>enter</kbd> open · <kbd>esc</kbd> close</p>
   </div>
@@ -45,8 +48,12 @@ const index = items.map((i) => ({
   /* ---- quick search ---- */
   .qs { position: fixed; inset: 0; z-index: 100; background: rgba(6,8,18,0.72); display: flex; justify-content: center; padding: 12vh 18px 0; }
   .qs-box { width: 100%; max-width: 560px; border: 1px solid var(--line); border-radius: 16px; background: rgba(13,16,34,0.99); box-shadow: 0 40px 80px -40px #000; overflow: hidden; height: max-content; }
-  #qs-input { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--text); font-family: "Space Grotesk", sans-serif; font-size: 17px; padding: 18px 20px; outline: none; }
+  .qs-field { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
+  #qs-input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font-family: "Space Grotesk", sans-serif; font-size: 17px; padding: 18px 8px 18px 20px; outline: none; }
   #qs-input::placeholder { color: var(--muted); }
+  .qs-close { flex: none; margin-right: 12px; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; transition: color .18s, border-color .18s, background .18s; }
+  .qs-close:hover { color: var(--text); border-color: color-mix(in srgb, var(--teal) 55%, transparent); background: rgba(255,255,255,0.04); }
+  .qs-close:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
   .qs-results { list-style: none; margin: 0; padding: 6px; max-height: 46vh; overflow-y: auto; }
   .qs-results li a { display: block; padding: 10px 14px; border-radius: 9px; text-decoration: none; color: var(--text); }
   .qs-results li.sel a, .qs-results li a:hover { background: rgba(255,255,255,0.06); }
@@ -147,5 +154,6 @@ const index = items.map((i) => ({
     });
     input.addEventListener('input', render);
     qs.addEventListener('click', (e) => { if (e.target === qs) close(); });
+    document.getElementById('qs-close')?.addEventListener('click', close);
   }
 </script>
