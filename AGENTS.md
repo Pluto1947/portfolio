@@ -47,6 +47,9 @@ These went through the consensus process below and are locked — implement dire
 - Both free via Google Fonts (`fonts.googleapis.com`)
 - Chosen over a more editorial serif option specifically for legibility and boldness at first glance.
 
+### Title treatment, confirmed: CRT scanlines
+Every page title (landing hero, domain headers, content pages) uses one cyberpunk treatment for consistency: fine horizontal scanlines across the text, a soft glow, faint magenta and cyan edges, and a scan bar sweeping down. The glow and sweep colors come from the page's domain accent via `color-mix`, so a title glows in its own domain color, while the scanline and the magenta/cyan edges stay constant. Reduced-motion disables the sweep and keeps the static look. Implement as one reusable title component or class, not per page. Picked over a chromatic-split glitch, a neon-flicker, and a louder magenta/cyan glitch.
+
 ### Background motif — dot-halftone horizon
 A recurring background texture, used site-wide (not landing-page-only) so it reads as a consistent motif rather than a one-off decoration.
 
