@@ -159,6 +159,7 @@ Work through these in order. Do not start a phase until the previous one's deliv
 ## Conventions
 
 - Slugs: kebab-case.
+- **Writing style**: no dashes as punctuation in content or docs. Use a comma, colon, or full stop instead of an em or en dash. Keep hyphens only where they are genuinely part of a term, and reword to avoid even those where a plainer phrasing reads better. Correct punctuation, clean formatting, and readability come first.
 - Commit prefixes: `content:` for anything under `content/`, `site:` for generator/theme code, `infra:` for CI/deploy config, `docs:` for project documentation (`README.md`, `AGENTS.md`, `CLAUDE.md`).
 - Every new content item must pass the CI frontmatter check before merge — do not disable or skip this check to unblock a merge.
 - Do not hand-place globe coordinates in content files — always go through `_locations.json`.

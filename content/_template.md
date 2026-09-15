@@ -3,7 +3,7 @@
 #   content/<domain>/<slug>/index.md   (+ any *.png / *.cast media beside it)
 # Slugs are kebab-case. Fill every field below, then delete these comments.
 
-title: "PLACEHOLDER — replace me"
+title: "PLACEHOLDER: replace me"
 type: writeup                 # one of: writeup | project | note | theory
 domains: [security]           # one or more domain slugs (= folder names): security, machine-learning, cloud, web
 location: remote              # a slug from content/_locations.json, or "remote" / omit if not place-tied
