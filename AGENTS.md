@@ -111,6 +111,8 @@ summary: "one line, used as card preview text"
 
 `_template.md` is the copy-paste starting point for new content. Keep its body sections aligned to the write-up structure below. If the schema changes, update `_template.md` in the same commit.
 
+**Inline wiki links (`[[slug]]`).** Bodies may link to other content Obsidian/Logseq-style: `[[network-attacks-mininet]]` or `[[slug|custom label]]` resolves to that item's page. Implemented with a remark plugin in the Astro build. These inline links count as graph edges exactly like `related:` frontmatter — both feed backlinks (see Architecture → Linked references). A `[[slug]]` pointing at a non-existent item should render as a visible "unresolved link", not a hard error.
+
 Every write-up body follows this structure (enforced by convention, not code):
 1. Context — one line, what/why
 2. Approach — short, bullets fine
@@ -119,7 +121,12 @@ Every write-up body follows this structure (enforced by convention, not code):
 
 ## Architecture
 
-- **Domain pages**: auto-generated, one per top-level folder under `content/`. Adding a new folder should require zero code changes to produce a new page.
+- **Domain pages**: auto-generated, one per top-level folder under `content/`. Adding a new folder should require zero code changes to produce a new page. **Layout (confirmed):** items **grouped by `type`** under Project / Writeup / Note / Theory headings (not a card grid or table), plus a **Connections rail** (see Linked references).
+- **Linked references (wiki panel), confirmed**: the site reads as a wiki — every domain and content page surfaces its graph connections as plain-HTML links (the non-globe version of the Phase 3 graph). Three panels, all build-time computed by indexing every item's `domains`, `related:`, and inline `[[slug]]` links:
+  - *Backlinks ("Linked from")*: every page that links to this one (via `related:` or `[[slug]]`).
+  - *Connected domains*: other domains this page's items also belong to (cross-domain items are the generalist thread).
+  - *Related*: explicit `related:` entries plus items sharing tags.
+  - Tags are **not** a wiki spine — they stay as plain metadata (Dan's call). Backlinks/related/connected-domains are the graph.
 - **Project/writeup/note pages**: one per content folder, typed via `type` in frontmatter.
 - **Graph edges** — two distinct kinds, must remain visually distinguishable (color/thickness/dash):
   - *Biographical arcs*: chronological path between locations (Cyprus → Brussels, etc.)
