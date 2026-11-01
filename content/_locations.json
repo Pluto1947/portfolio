@@ -4,6 +4,24 @@
     "lng": 4.6152,
     "label": "UCLouvain, Louvain-la-Neuve, Belgium"
   },
+  "placeholder-a": {
+    "lat": 41.9,
+    "lng": 12.5,
+    "label": "PLACEHOLDER: place A",
+    "since": "2018-09"
+  },
+  "placeholder-b": {
+    "lat": 48.2,
+    "lng": 16.4,
+    "label": "PLACEHOLDER: place B",
+    "since": "2020-09"
+  },
+  "placeholder-c": {
+    "lat": 51.2,
+    "lng": 5.4,
+    "label": "PLACEHOLDER: place C",
+    "since": "2022-09"
+  },
   "remote": {
     "label": "Remote"
   }
