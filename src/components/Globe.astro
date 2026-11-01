@@ -43,8 +43,17 @@ const data = await getGlobeData();
 }).replace(/</g, '\\u003c')} />
 
 <style>
-  .globe-wrap { position: relative; width: min(100%, 84vh); margin-inline: auto; }
-  .globe { position: relative; width: 100%; aspect-ratio: 1; max-width: 100%; overflow: hidden; }
+  /* The globe draws across the whole hero and fades out at every edge, so it
+     sits on the page background with no visible box, even when zoomed. */
+  .globe-wrap { position: relative; width: 100%; }
+  .globe {
+    position: relative; width: 100%; height: clamp(360px, calc(100svh - 110px), 1100px); overflow: hidden;
+    --fade: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent),
+            linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
+    -webkit-mask-image: var(--fade); -webkit-mask-composite: source-in;
+    mask-image: var(--fade); mask-composite: intersect;
+  }
+  @media (max-width: 620px) { .globe { height: max(360px, 105vw); } }
   .globe-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; text-align: center; padding: 0 20px; }
 
   .globe-reset {
@@ -162,11 +171,11 @@ const data = await getGlobeData();
     const box = host.getBoundingClientRect();
 
     const globe = new Globe(host, { rendererConfig: { antialias: true, alpha: true } })
-      .width(box.width).height(box.width)
+      .width(box.width).height(box.height)
       .backgroundColor('rgba(0,0,0,0)')
       .globeImageUrl('/globe/earth-night.jpg')
       .bumpImageUrl('/globe/earth-topology.jpg')
-      .showAtmosphere(true).atmosphereColor('#5fb8ff').atmosphereAltitude(0.18)
+      .showAtmosphere(false)
       .onGlobeReady(() => {
         statusEl?.remove();
         // let the city lights glow on their own instead of being dimmed by scene lighting
@@ -289,23 +298,30 @@ const data = await getGlobeData();
     }
 
     // --- label collisions --------------------------------------------------
-    // Labels that would overlap another label or run off the globe box flip to
+    // Labels that would overlap another label or run into the faded edges flip to
     // the left of their pin; if that still collides they hide until hover.
     const placeLabels = () => {
       const hostBox = host.getBoundingClientRect();
-      const placed: DOMRect[] = [];
-      const hits = (r: DOMRect) =>
-        r.left < hostBox.left || r.right > hostBox.right ||
+      const edge = hostBox.width * 0.1; // keep labels out of the faded edges
+      type Box = { left: number; right: number; top: number; bottom: number };
+      const placed: Box[] = [];
+      const hits = (r: Box) =>
+        r.left < hostBox.left + edge || r.right > hostBox.right - edge ||
         placed.some((q) => r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top);
       const pins = [...host.querySelectorAll<HTMLElement>('.gpin:not(.hidden)')];
       for (const pin of pins) {
         const label = pin.querySelector<HTMLElement>('.glabel');
         if (!label) continue;
-        pin.classList.remove('flip', 'quiet');
-        let r = label.getBoundingClientRect();
-        if (hits(r)) { pin.classList.add('flip'); r = label.getBoundingClientRect(); }
-        if (hits(r)) { pin.classList.remove('flip'); pin.classList.add('quiet'); continue; }
-        placed.push(r);
+        // Work out both label positions from the pin anchor, without moving the label,
+        // so classes only change when the answer changes (no flicker).
+        const a = pin.getBoundingClientRect(), w = label.offsetWidth, h = label.offsetHeight;
+        const top = a.top - 14 - h, bottom = a.top - 14;
+        const right: Box = { left: a.left + 13, right: a.left + 13 + w, top, bottom };
+        const left: Box = { left: a.left - 13 - w, right: a.left - 13, top, bottom };
+        const mode = !hits(right) ? '' : !hits(left) ? 'flip' : 'quiet';
+        pin.classList.toggle('flip', mode === 'flip');
+        pin.classList.toggle('quiet', mode === 'quiet');
+        if (mode !== 'quiet') placed.push(mode === 'flip' ? left : right);
       }
     };
     setInterval(placeLabels, 200);

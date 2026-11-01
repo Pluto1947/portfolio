@@ -24,7 +24,7 @@ This file is for Claude Code specifically. **Read `AGENTS.md` first** — it's t
 - Background motif: dot-halftone dome/horizon texture + flat scrim overlay, used site-wide (full version on landing, subtler echo elsewhere). See `AGENTS.md` "Confirmed design decisions" for the exact composition and implementation notes — exact shape/ring details are still refinable in Phase 6, don't treat those as needing another round of options first.
 
 - Landing hero: **Globe only**, centred, no heading, domain key as a small row under it. Picked in Phase 3.
-- Globe look: realistic **night lights** Earth with relief and atmosphere; pins are **map pin icons with labels** and a pulsing ring. Confirmed by Dan in Phase 3. See `AGENTS.md` for details.
+- Globe look: realistic **night lights** Earth with relief, no atmosphere glow, drawn across the whole hero with soft faded edges so it sits on the background; pins are **map pin icons with labels** and a pulsing ring. Confirmed by Dan in Phase 3. See `AGENTS.md` for details.
 
 ## Commands
 
