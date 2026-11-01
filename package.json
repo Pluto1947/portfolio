@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "local": "git pull --ff-only && npm install && npm run build && npm run preview",
     "astro": "astro"
   },
   "dependencies": {
