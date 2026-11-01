@@ -12,9 +12,7 @@ The generalist background is the concept, not a weakness to work around: the sit
 
 This file was generated from a planning conversation. Palette and typography are confirmed (see "Confirmed design decisions" below). The domain list is now confirmed too (see "Domains" below).
 
-Still open, MUST be confirmed with Dan before being finalized in code:
-
-- **Landing hero composition** — see "Confirmed design decisions" → Background motif. Deliberate at Phase 3/6, don't auto-pick.
+The landing hero composition is now decided too: **Globe only** (see "Confirmed design decisions" → Background motif).
 
 Do not silently resolve open items. Surface them at the relevant phase instead of guessing.
 
@@ -56,16 +54,16 @@ A recurring background texture, used site-wide (not landing-page-only) so it rea
 - Composition: a dark navy base (`#0A0C18`/`#0F1226` range), a dot-halftone texture (SVG `<pattern>` of small circles, not a raster image) filling a dome/horizon shape, faint concentric rings above the horizon line in the teal accent at low opacity.
 - Always paired with a flat semi-transparent scrim (a solid `rgba(10,12,24, ~0.5)` overlay, not a gradient) between the background layer and foreground content, so the texture never competes with text/UI for attention. Tune the scrim opacity per page until contrast passes accessibility checks.
 - Implementation: background layer at a low z-index (SVG or CSS, not a photo/raster asset, so it stays crisp at any size and costs nothing to load), scrim above it, real content above both.
-- Usage: full composition (dome + rings + scrim) on the landing page; a subtler/quieter echo of the same dot texture on other pages (e.g. behind domain page headers) rather than repeating the full landing-page scene everywhere.
+- Usage: the landing page has no dome (see the hero decision below); the globe itself is drawn as a dot sphere, so it carries the halftone motif there. The dome composition (dome + rings + scrim) lives on other pages, e.g. behind domain page headers.
 - Status: the core motif (dot-halftone + horizon shape + scrim technique) is confirmed and safe to build against now. Exact composition details (dome vs. other shapes, whether the rings stay) are intentionally left open for refinement in Phase 6 rather than nailed down upfront — Dan's preference here is to move forward with a good-enough version now and refactor later rather than over-iterating before any code exists.
 
-**Landing hero composition — open, requires deliberation before implementing.** Unlike the rest of this section, this is not a locked choice. Four candidate approaches have been discussed:
+**Landing hero composition, decided: Globe only.** Dan picked it in Phase 3 after comparing live mockups of Framed, Separated and Globe only. The globe sits beside the intro and domain colour key with no dome layer, so nothing covers or clips it and zoom is unrestricted. Dan may revisit this if it doesn't look right; the other candidates, for the record:
 1. **Merged** — the globe's lower half tucks behind the dome's front edge, reading as though it rises from the horizon (closest to the original mood reference).
 2. **Separated** — globe fully visible above, dome reduced to a thin strip at the bottom, no overlap.
 3. **Globe-only** — dome skipped in the hero entirely, used only on other pages.
 4. **Framed** — the dome acts as a window/frame containing the globe, overlaid so it never obscures or blocks any interactive element (pins, arcs, click targets). This is Dan's current leaning.
 
-When work reaches this point (Phase 3 globe integration, or Phase 6 theming), do not default to picking one of these automatically just because they're listed. Actually deliberate: weigh them against the real implementation constraints at that time — how clipping/masking would work against a WebGL canvas, whether the dome can render around the globe without blocking hit-testing on pins/arcs, performance impact — and bring the trade-offs to Dan before committing to one, even though the options themselves are already pre-discussed here.
+Trade-offs found in Phase 3: Framed needs zoom limits or a fading frame, because zoomed pins slide under the dots and still react to the pointer. Separated clips the globe at the horizon when zoomed. Merged needs the dome inside the 3D scene to hide pins correctly.
 
 ## Stack
 
@@ -110,7 +108,7 @@ summary: "one line, used as card preview text"
 ---
 ```
 
-`_locations.json` maps a location slug to `{ lat, lng, label }`. Add new locations here once; content references the slug, never raw coordinates. Include a `remote` entry (no lat/lng) for content with no physical location — render these as a fallback list or orbiting element, not force-fit onto a country.
+`_locations.json` maps a location slug to `{ lat, lng, label, since? }`. Add new locations here once; content references the slug, never raw coordinates. Include a `remote` entry (no lat/lng) for content with no physical location — render these as a fallback list or orbiting element, not force-fit onto a country. `since` (`YYYY` or `YYYY-MM`, optional) is when Dan arrived there: locations with a `since` are joined in date order to draw the biographical arcs, so the journey is edited in this one file. The build validates this file like frontmatter. Entries labelled `PLACEHOLDER` are mock locations until Dan supplies real ones.
 
 `_template.md` is the copy-paste starting point for new content. Keep its body sections aligned to the write-up structure below. If the schema changes, update `_template.md` in the same commit.
 
@@ -132,9 +130,9 @@ Every write-up body follows this structure (enforced by convention, not code):
   - Tags are **not** a wiki spine — they stay as plain metadata (Dan's call). Backlinks/related/connected-domains are the graph.
 - **Project/writeup/note pages**: one per content folder, typed via `type` in frontmatter.
 - **Graph edges** — two distinct kinds, must remain visually distinguishable (color/thickness/dash):
-  - *Biographical arcs*: chronological path between locations (Cyprus → Brussels, etc.)
-  - *Thematic arcs*: derived from shared `domains` and explicit `related` links
-- **Globe pins**: one per resolved location, sized or glow-intensity scaled by content count at that location. Locations with many items cluster and expand on click/zoom rather than overlapping pins.
+  - *Biographical arcs*: chronological path between locations, ordered by each location's `since` in `_locations.json`.
+  - *Thematic arcs*: one arc per pair of locations whose items share a domain or link to each other (`related:` or `[[slug]]`). Links weigh more than a shared domain, and weight sets arc thickness.
+- **Globe pins**: one per location with coordinates, sized by content count at that location (a location with no content yet shows a dim pin). Nearby locations merge into a numbered cluster that splits as you zoom; clicking a cluster zooms in, clicking a pin lists its items. globe.gl has no built in clustering, so this is done in `src/components/Globe.astro`.
 - **Accessibility/SEO fallback**: every domain and content page must be reachable via plain HTML navigation independent of the WebGL globe. Built in Phase 2 as `/sitemap` (linked from the footer on every page) plus a domain list on the placeholder home page. The globe is the flagship experience, not the only entry point.
 - **Performance**: the globe should lazy-load after core page content renders, not block first paint.
 
@@ -184,5 +182,6 @@ One calibration note, from how the background motif decision went: once Dan has 
 ## Open questions — do not resolve unilaterally
 
 - ~~Domain list~~: **resolved** — see "Domains (confirmed)" above (security, machine-learning, cloud, web).
-- Landing hero composition (how the globe relates to the dome motif): four candidates already discussed in "Confirmed design decisions" → Background motif. Requires active deliberation against real implementation constraints when reached, not an automatic pick — see that section for the full instruction.
+- ~~Landing hero composition~~: **resolved**, Globe only. See "Confirmed design decisions" → Background motif.
+- Real locations and dates for the biographical journey: `_locations.json` holds placeholders until Dan supplies them.
 - Layout/design choices not yet covered by "Confirmed design decisions" (e.g. page-level layout, component styling beyond what's listed): see Decision-making process above — every one of these needs Dan's sign-off, presented as options, not decided unilaterally.

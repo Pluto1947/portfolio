@@ -23,8 +23,7 @@ This file is for Claude Code specifically. **Read `AGENTS.md` first** — it's t
 - Animation stack: Astro View Transitions (page nav), GSAP + ScrollTrigger (scroll reveals), Anime.js (UI micro-interactions). See `AGENTS.md` Stack section for which layer handles what — don't blend their responsibilities or add a fourth library.
 - Background motif: dot-halftone dome/horizon texture + flat scrim overlay, used site-wide (full version on landing, subtler echo elsewhere). See `AGENTS.md` "Confirmed design decisions" for the exact composition and implementation notes — exact shape/ring details are still refinable in Phase 6, don't treat those as needing another round of options first.
 
-**Not yet confirmed — needs real deliberation when reached, not a quick pick:**
-- Landing hero composition (globe vs. dome relationship): four candidates are pre-listed in `AGENTS.md`, Dan currently leans toward "Framed" (dome as a window around the globe, overlaid so it never blocks interactive elements). When Phase 3 or Phase 6 reaches this, actually weigh the options against the real implementation constraints at that point (masking against a WebGL canvas, hit-testing on pins/arcs, performance) and bring the trade-offs to Dan — don't just implement the leaning option by default because it's written down.
+- Landing hero: **Globe only**, picked in Phase 3 after live mockups. The globe is a dot sphere, so it carries the halftone motif; the dome lives on other pages. Dan may revisit it if it doesn't look right.
 
 ## Commands
 
@@ -85,5 +84,8 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 - Phases 0, 1 and 2 are done. Phase 2 was signed off by Dan after review fixes: coming soon pages for empty domains, About and Contact stubs, a `/sitemap` page with a footer link, and phone title wrapping.
 - The domain list on the placeholder home page stays for now as a colour key. Revisit it with the hero layout in Phase 3; the nav already covers plain link navigation.
 - Already built ahead of schedule: tag filtering, hover previews, foldable groups and quick search. These were Dan's requests, so keep them.
-- Next: Phase 3 (globe and graph). The landing hero composition decision opens there. See Open questions in `AGENTS.md`.
+- Phase 3 (globe and graph) is built and awaiting Dan's confirmation: globe.gl on the home page, lazy loaded, pins from `_locations.json`, journey and connected work arcs, clustering, a location panel on pin click.
+- Locations are mock: `placeholder-a/b/c` in `_locations.json`, with the example note and theory moved onto two of them. Swap in Dan's real places and `since` dates when he sends them; no code change needed.
+- Globe look (surface, pin style, arc colours) is a baseline for Phase 6. Known detail for then: journey and connected work arcs between the same two places overlap when seen from straight above.
+- The globe bundle is about 2 MB before compression (three.js). It loads after the page renders, but size is worth a look in Phase 7.
 - Run `npm install` first in a fresh environment.
