@@ -38,6 +38,9 @@ npm run build
 # preview the production build locally:
 npm run preview
 
+# Dan's one step local check: pull, install, build, then preview:
+npm run local
+
 # frontmatter validation (this IS the CI check — schema in src/content.config.ts):
 npm run build
 ```
