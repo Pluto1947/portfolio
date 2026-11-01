@@ -82,7 +82,8 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 
 ## Current state
 
-- Phases 0 and 1 are done. Phase 2 (domain pages, content pages, fallback nav) is built and awaiting Dan's confirmation. Review fixes are in: coming soon pages for empty domains, About and Contact stubs, a `/sitemap` page with a footer link, a domain list on the home page, and phone title wrapping.
+- Phases 0, 1 and 2 are done. Phase 2 was signed off by Dan after review fixes: coming soon pages for empty domains, About and Contact stubs, a `/sitemap` page with a footer link, and phone title wrapping.
+- The domain list on the placeholder home page stays for now as a colour key. Revisit it with the hero layout in Phase 3; the nav already covers plain link navigation.
 - Already built ahead of schedule: tag filtering, hover previews, foldable groups and quick search. These were Dan's requests, so keep them.
-- Next: get Dan's Phase 2 sign off, then Phase 3 (globe and graph). The landing hero composition decision opens there. See Open questions in `AGENTS.md`.
+- Next: Phase 3 (globe and graph). The landing hero composition decision opens there. See Open questions in `AGENTS.md`.
 - Run `npm install` first in a fresh environment.
