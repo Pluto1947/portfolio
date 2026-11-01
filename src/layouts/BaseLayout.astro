@@ -1,6 +1,7 @@
 ---
 import Nav from '../components/Nav.astro';
 import SiteUX from '../components/SiteUX.astro';
+import SiteTerminal from '../components/SiteTerminal.astro';
 import '../styles/global.css';
 
 interface Props { title?: string; }
@@ -32,5 +33,6 @@ const { title = 'Dan' } = Astro.props;
       </main>
     </div>
     <SiteUX />
+    <SiteTerminal />
   </body>
 </html>

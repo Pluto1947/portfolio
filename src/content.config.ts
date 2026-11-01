@@ -2,6 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import locations from '../content/_locations.json';
 import services from '../content/_services.json';
+import terminal from '../content/_terminal.json';
 
 // This schema IS the frontmatter validator. `astro build` (and CI) parse every
 // content file against it and fail on missing/malformed fields — see AGENTS.md
@@ -33,6 +34,16 @@ const serviceSchema = z.array(z.object({
 const parsedServices = serviceSchema.safeParse(services);
 if (!parsedServices.success) {
   throw new Error(`content/_services.json is invalid: ${parsedServices.error.message}`);
+}
+
+// _terminal.json holds the site terminal's whoami text and any extra fixed commands.
+const terminalSchema = z.object({
+  whoami: z.string().min(1),
+  commands: z.record(z.string().regex(/^[a-z0-9-]+$/, 'command names are lowercase letters, digits and hyphens'), z.string()).default({}),
+});
+const parsedTerminal = terminalSchema.safeParse(terminal);
+if (!parsedTerminal.success) {
+  throw new Error(`content/_terminal.json is invalid: ${parsedTerminal.error.message}`);
 }
 
 const locationSlugs = Object.keys(locations);
