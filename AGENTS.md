@@ -124,7 +124,7 @@ Every write-up body follows this structure (enforced by convention, not code):
 
 ## Architecture
 
-- **Domain pages**: auto-generated, one per top-level folder under `content/`. Adding a new folder should require zero code changes to produce a new page. **Layout (confirmed):** items **grouped by `type`** under Project / Writeup / Note / Theory headings (not a card grid or table), plus a **Connections rail** (see Linked references).
+- **Domain pages**: auto-generated, one per domain. The four confirmed domains always get a page (an empty one says "coming soon"), and any other domain named in an item's `domains:` gets one too, so a new domain still needs zero code changes. An item's URL comes from its folder: `/<folder>/<slug>`. **Layout (confirmed):** items **grouped by `type`** under Project / Writeup / Note / Theory headings (not a card grid or table), plus a **Connections rail** (see Linked references).
 - **Linked references (wiki panel), confirmed**: the site reads as a wiki — every domain and content page surfaces its graph connections as plain-HTML links (the non-globe version of the Phase 3 graph). Three panels, all build-time computed by indexing every item's `domains`, `related:`, and inline `[[slug]]` links:
   - *Backlinks ("Linked from")*: every page that links to this one (via `related:` or `[[slug]]`).
   - *Connected domains*: other domains this page's items also belong to (cross-domain items are the generalist thread).
@@ -135,7 +135,7 @@ Every write-up body follows this structure (enforced by convention, not code):
   - *Biographical arcs*: chronological path between locations (Cyprus → Brussels, etc.)
   - *Thematic arcs*: derived from shared `domains` and explicit `related` links
 - **Globe pins**: one per resolved location, sized or glow-intensity scaled by content count at that location. Locations with many items cluster and expand on click/zoom rather than overlapping pins.
-- **Accessibility/SEO fallback**: every domain and content page must be reachable via plain HTML navigation (a sitemap/list view) independent of the WebGL globe. The globe is the flagship experience, not the only entry point.
+- **Accessibility/SEO fallback**: every domain and content page must be reachable via plain HTML navigation independent of the WebGL globe. Built in Phase 2 as `/sitemap` (linked from the footer on every page) plus a domain list on the placeholder home page. The globe is the flagship experience, not the only entry point.
 - **Performance**: the globe should lazy-load after core page content renders, not block first paint.
 
 ## Design principles
