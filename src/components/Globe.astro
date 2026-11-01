@@ -1,0 +1,243 @@
+---
+// Home page globe (Phase 3). Data is built at build time from _locations.json
+// and content frontmatter; globe.gl is loaded only after the page has rendered,
+// so it never blocks first paint. Without WebGL or JS the page still works:
+// the nav, the domain list and /sitemap cover every page.
+import { getGlobeData } from '../lib/globe';
+import { accentFor } from '../lib/graph';
+
+const data = await getGlobeData();
+---
+
+<div class="globe-wrap">
+  <div class="globe" id="globe" role="img" aria-label="Interactive globe of places where content was made. Every item is also listed in the site navigation.">
+    <p class="globe-status" id="globe-status">Loading globe…</p>
+  </div>
+  <div class="globe-legend" aria-hidden="true">
+    <span class="lg bio">journey</span>
+    <span class="lg theme">connected work</span>
+  </div>
+  <div class="globe-panel" id="globe-panel" hidden>
+    <button class="gp-close" type="button" aria-label="Close">×</button>
+    <p class="gp-title"></p>
+    <ul class="gp-list"></ul>
+  </div>
+  {data.remote.length > 0 && (
+    <div class="globe-remote">
+      <p class="ptitle">Remote</p>
+      {data.remote.map((r) => (
+        <a class="rlink" href={r.url} style={`--d:${accentFor(r.domain)}`}>{r.title}</a>
+      ))}
+    </div>
+  )}
+</div>
+
+<script type="application/json" id="globe-data" set:html={JSON.stringify({
+  ...data,
+  accents: Object.fromEntries(data.pins.flatMap((p) => p.items).concat(data.remote).map((i) => [i.domain, accentFor(i.domain)])),
+}).replace(/</g, '\\u003c')} />
+
+<style>
+  .globe-wrap { position: relative; width: 100%; }
+  .globe { position: relative; width: 100%; aspect-ratio: 1; max-width: 100%; overflow: hidden; }
+  .globe-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; }
+  .globe-legend { display: flex; gap: 16px; justify-content: center; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .lg::before { content: ""; display: inline-block; width: 18px; border-top: 2px solid; margin-right: 7px; vertical-align: middle; }
+  .lg.bio::before { border-top-style: dashed; border-color: var(--coral); }
+  .lg.theme::before { border-color: var(--violet); }
+
+  .globe-panel {
+    position: absolute; left: 12px; top: 12px; z-index: 5; width: min(300px, calc(100% - 24px));
+    border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px 12px;
+    background: rgba(15,18,38,0.94);
+  }
+  .gp-title { font-family: "Space Grotesk", sans-serif; font-size: 15px; margin: 0 22px 8px 0; color: var(--text); }
+  .gp-list { list-style: none; margin: 0; padding: 0; }
+  .gp-list .empty { color: var(--muted); font-size: 13px; }
+  .gp-close { position: absolute; right: 8px; top: 6px; background: none; border: 0; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; padding: 4px 6px; }
+  .gp-close:hover { color: var(--text); }
+  .globe-remote { margin-top: 14px; }
+
+  /* pins are DOM buttons placed by globe.gl, so style them globally */
+  :global(.gpin) {
+    --s: 12px; width: var(--s); height: var(--s); border-radius: 50%; padding: 0; cursor: pointer;
+    border: 0; background: var(--teal); pointer-events: auto; transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 22%, transparent), 0 0 14px 2px color-mix(in srgb, var(--teal) 55%, transparent);
+    transition: box-shadow .2s, transform .2s;
+  }
+  :global(.gpin:hover), :global(.gpin:focus-visible) { transform: translate(-50%, -50%) scale(1.25); outline: none; }
+  :global(.gpin.empty) { background: color-mix(in srgb, var(--teal) 45%, #0F1226); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 14%, transparent); }
+  :global(.gpin.cluster) {
+    display: grid; place-items: center; font: 600 11px/1 "Space Grotesk", sans-serif; color: #0F1226;
+    background: var(--teal);
+  }
+</style>
+
+<script>
+  type Item = { title: string; url: string; domain: string; type: string };
+  type Pin = { slug: string; label: string; lat: number; lng: number; items: Item[] };
+  type Arc = { kind: 'bio' | 'theme'; startLat: number; startLng: number; endLat: number; endLng: number; weight: number; label: string };
+  type Data = { pins: Pin[]; arcs: Arc[]; remote: Item[]; accents: Record<string, string> };
+  type Cluster = { key: string; lat: number; lng: number; pins: Pin[]; el?: HTMLElement };
+
+  const host = document.getElementById('globe') as HTMLElement | null;
+  const statusEl = document.getElementById('globe-status');
+  const panel = document.getElementById('globe-panel') as HTMLElement | null;
+  const raw = document.getElementById('globe-data')?.textContent;
+
+  const hasWebGL = () => {
+    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
+  };
+
+  function start() {
+    if (!host || !raw) return;
+    if (!hasWebGL()) { if (statusEl) statusEl.textContent = 'The globe needs WebGL. Every page is still in the menu.'; return; }
+    import('globe.gl').then(({ default: Globe }) => mount(Globe, JSON.parse(raw) as Data)).catch(() => {
+      if (statusEl) statusEl.textContent = 'The globe could not load. Every page is still in the menu.';
+    });
+  }
+
+  // Great circle distance in degrees, used for clustering nearby pins.
+  const deg = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+    const r = Math.PI / 180, s = Math.sin, c = Math.cos;
+    const x = s(a.lat * r) * s(b.lat * r) + c(a.lat * r) * c(b.lat * r) * c((a.lng - b.lng) * r);
+    return Math.acos(Math.min(1, Math.max(-1, x))) / r;
+  };
+  // Pins closer than this many degrees merge into one cluster; shrinks as you zoom in.
+  const threshold = (altitude: number) => altitude * 1.5;
+
+  function clusterPins(pins: Pin[], altitude: number): Cluster[] {
+    const out: Cluster[] = [];
+    for (const p of pins) {
+      const near = out.find((c) => deg(c, p) < threshold(altitude));
+      if (near) {
+        near.pins.push(p);
+        near.lat = near.pins.reduce((t, q) => t + q.lat, 0) / near.pins.length;
+        near.lng = near.pins.reduce((t, q) => t + q.lng, 0) / near.pins.length;
+      } else out.push({ key: '', lat: p.lat, lng: p.lng, pins: [p] });
+    }
+    for (const c of out) c.key = c.pins.map((p) => p.slug).sort().join('+');
+    return out;
+  }
+
+  function mount(Globe: any, data: Data) {
+    if (!host) return;
+    statusEl?.remove();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // dot sphere: the halftone motif carried by the globe itself
+    const dots: { lat: number; lng: number }[] = [];
+    const N = 1800;
+    for (let i = 0; i < N; i++) {
+      const y = 1 - (i / (N - 1)) * 2, t = i * 2.399963;
+      dots.push({ lat: Math.asin(y) * 180 / Math.PI, lng: ((t * 180 / Math.PI) % 360) - 180 });
+    }
+
+    const box = host.getBoundingClientRect();
+    const globe = new Globe(host, { rendererConfig: { antialias: true, alpha: true } })
+      .width(box.width).height(box.width)
+      .backgroundColor('rgba(0,0,0,0)')
+      .showAtmosphere(true).atmosphereColor('#2DD4BF').atmosphereAltitude(0.14)
+      .pointsData(dots).pointLat('lat').pointLng('lng')
+      .pointAltitude(0.002).pointRadius(0.32).pointResolution(12)
+      .pointColor(() => 'rgba(233,231,245,0.30)').pointsMerge(true)
+      .arcsData(data.arcs)
+      .arcColor((a: Arc) => (a.kind === 'bio' ? '#FB923C' : 'rgba(167,139,250,0.85)'))
+      .arcStroke((a: Arc) => (a.kind === 'bio' ? 0.55 : 0.3 + 0.12 * Math.sqrt(a.weight)))
+      .arcDashLength((a: Arc) => (a.kind === 'bio' ? 0.05 : 1))
+      .arcDashGap((a: Arc) => (a.kind === 'bio' ? 0.035 : 0))
+      .arcDashAnimateTime((a: Arc) => (a.kind === 'bio' && !reduce ? 6000 : 0))
+      .arcAltitudeAutoScale(0.35)
+      // connected work flies lower than the journey, so the two never sit on one line
+      .arcAltitude((a: Arc) => (a.kind === 'theme' ? (deg({ lat: a.startLat, lng: a.startLng }, { lat: a.endLat, lng: a.endLng }) / 57.3) * 0.16 : null))
+      .arcLabel((a: Arc) => a.label)
+      .htmlLat('lat').htmlLng('lng').htmlAltitude(0.005)
+      .htmlElement((c: Cluster) => c.el!);
+
+    globe.globeMaterial().color.set('#0d1030');
+    globe.globeMaterial().emissive?.set?.('#0b0e24');
+
+    const controls = globe.controls();
+    controls.autoRotate = !reduce;
+    controls.autoRotateSpeed = 0.35;
+    controls.minDistance = 112;
+    controls.maxDistance = 600;
+    host.addEventListener('pointerdown', () => (controls.autoRotate = false), { once: true });
+
+    globe.pointOfView({ lat: 40, lng: 10, altitude: 2.2 }, 0);
+
+    // pins, rebuilt only when the cluster grouping changes
+    let currentKeys = '';
+    const elFor = (c: Cluster) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      const count = c.pins.reduce((t, p) => t + p.items.length, 0);
+      if (c.pins.length > 1) {
+        b.className = 'gpin cluster';
+        b.textContent = String(c.pins.length);
+        b.setAttribute('aria-label', `${c.pins.length} places close together. Zoom in.`);
+        b.style.setProperty('--s', '22px');
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // zoom until the closest two pins in the cluster fall under the split distance
+          let closest = Infinity;
+          for (const a of c.pins) for (const q of c.pins) if (a !== q) closest = Math.min(closest, deg(a, q));
+          globe.pointOfView({ lat: c.lat, lng: c.lng, altitude: Math.max(0.13, (closest / 1.5) * 0.4) }, 900);
+          controls.autoRotate = false;
+        });
+      } else {
+        const p = c.pins[0];
+        b.className = count ? 'gpin' : 'gpin empty';
+        b.setAttribute('aria-label', `${p.label}: ${count} ${count === 1 ? 'item' : 'items'}`);
+        b.title = p.label;
+        b.style.setProperty('--s', `${Math.round(10 + 4 * Math.sqrt(count))}px`);
+        b.addEventListener('click', (e) => { e.stopPropagation(); openPanel(p); controls.autoRotate = false; });
+      }
+      return b;
+    };
+    const refresh = (altitude: number) => {
+      const clusters = clusterPins(data.pins, altitude);
+      const keys = clusters.map((c) => c.key).sort().join(',');
+      if (keys === currentKeys) return;
+      currentKeys = keys;
+      clusters.forEach((c) => (c.el = elFor(c)));
+      globe.htmlElementsData(clusters);
+    };
+    refresh(globe.pointOfView().altitude);
+    globe.onZoom((pov: { altitude: number }) => refresh(pov.altitude));
+
+    // location panel
+    function openPanel(p: Pin) {
+      if (!panel) return;
+      (panel.querySelector('.gp-title') as HTMLElement).textContent = p.label;
+      const list = panel.querySelector('.gp-list') as HTMLElement;
+      list.replaceChildren();
+      if (!p.items.length) {
+        const li = document.createElement('li'); li.className = 'empty'; li.textContent = 'Nothing published from here yet.'; list.append(li);
+      }
+      for (const it of p.items) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.className = 'rlink'; a.href = it.url; a.textContent = it.title;
+        a.style.setProperty('--d', data.accents[it.domain] ?? 'var(--muted)');
+        li.append(a); list.append(li);
+      }
+      panel.hidden = false;
+    }
+    panel?.querySelector('.gp-close')?.addEventListener('click', () => (panel.hidden = true));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel) panel.hidden = true; });
+
+    // keep the canvas sized to its box
+    const fit = () => { const r = host.getBoundingClientRect(); globe.width(r.width).height(r.height); };
+    new ResizeObserver(fit).observe(host);
+    fit();
+  }
+
+  // Load after the page is idle and the globe box is near the viewport.
+  const idle = (fn: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 200));
+  const go = () => idle(start);
+  if (host && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); go(); } }, { rootMargin: '200px' });
+    io.observe(host);
+  } else go();
+</script>

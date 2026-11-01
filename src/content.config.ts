@@ -6,6 +6,21 @@ import locations from '../content/_locations.json';
 // content file against it and fail on missing/malformed fields — see AGENTS.md
 // "Content schema". Keep it in sync with content/_template.md.
 
+// _locations.json is validated here too, so a typo fails the build like bad frontmatter.
+const locationSchema = z.record(
+  z.string(),
+  z.object({
+    lat: z.number().min(-90).max(90).optional(),
+    lng: z.number().min(-180).max(180).optional(),
+    label: z.string().min(1),
+    since: z.string().regex(/^\d{4}(-\d{2})?$/, 'since must be YYYY or YYYY-MM').optional(),
+  }).refine((l) => (l.lat === undefined) === (l.lng === undefined), 'lat and lng must be given together'),
+);
+const parsedLocations = locationSchema.safeParse(locations);
+if (!parsedLocations.success) {
+  throw new Error(`content/_locations.json is invalid: ${parsedLocations.error.message}`);
+}
+
 const locationSlugs = Object.keys(locations);
 
 const content = defineCollection({
