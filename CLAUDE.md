@@ -83,6 +83,7 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 ## Current state
 
 - Phases 0 to 3 are done. Phase 4 (contact form) is built on the branch: layout B (service cards plus form), picked by Dan. The real submission test is deferred by Dan: it needs form detection turned on in Netlify and one deploy to `main` (only when Dan says "deploy"). Dan asked to continue to Phase 5 meanwhile.
+- Phase 5 in progress. Done: evidence figures in write-ups (figure card frame, recordings play on click, screenshots open full size), with placeholder media in the example write-up. Next: the scripted interactive terminal; mock up placement and look for Dan before building.
 - Services and the Contact intro line are placeholders. Dan will update `content/_services.json` and the intro later.
 - Deferred to Phase 6: a constellation or starfield background, designed together with the dome motif. Dan likes the idea.
 - Phases 0, 1 and 2 are done. Phase 2 was signed off by Dan after review fixes: coming soon pages for empty domains, About and Contact stubs, a `/sitemap` page with a footer link, and phone title wrapping.
