@@ -3,6 +3,7 @@
 // and content frontmatter; globe.gl is loaded only after the page has rendered,
 // so it never blocks first paint. Without WebGL or JS the page still works:
 // the nav, the domain list and /sitemap cover every page.
+// Earth textures are NASA imagery (public domain), served from /globe.
 import { getGlobeData } from '../lib/globe';
 import { accentFor } from '../lib/graph';
 
@@ -11,17 +12,21 @@ const data = await getGlobeData();
 
 <div class="globe-wrap">
   <div class="globe" id="globe" role="img" aria-label="Interactive globe of places where content was made. Every item is also listed in the site navigation.">
-    <p class="globe-status" id="globe-status">Loading globe…</p>
+    <p class="globe-status" id="globe-status"></p>
+    <noscript><p class="globe-status">The globe needs JavaScript. Every page is still in the menu.</p></noscript>
   </div>
-  <div class="globe-legend" aria-hidden="true">
-    <span class="lg bio">journey</span>
-    <span class="lg theme">connected work</span>
-  </div>
+
+  <button class="globe-reset" id="globe-reset" type="button" hidden>
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Reset view
+  </button>
+
   <div class="globe-panel" id="globe-panel" hidden>
-    <button class="gp-close" type="button" aria-label="Close">×</button>
+    <button class="gp-close" type="button" aria-label="Close and zoom out">×</button>
     <p class="gp-title"></p>
     <ul class="gp-list"></ul>
   </div>
+
   {data.remote.length > 0 && (
     <div class="globe-remote">
       <p class="ptitle">Remote</p>
@@ -38,16 +43,21 @@ const data = await getGlobeData();
 }).replace(/</g, '\\u003c')} />
 
 <style>
-  .globe-wrap { position: relative; width: 100%; }
+  .globe-wrap { position: relative; width: min(100%, 84vh); margin-inline: auto; }
   .globe { position: relative; width: 100%; aspect-ratio: 1; max-width: 100%; overflow: hidden; }
-  .globe-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; }
-  .globe-legend { display: flex; gap: 16px; justify-content: center; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
-  .lg::before { content: ""; display: inline-block; width: 18px; border-top: 2px solid; margin-right: 7px; vertical-align: middle; }
-  .lg.bio::before { border-top-style: dashed; border-color: var(--coral); }
-  .lg.theme::before { border-color: var(--violet); }
+  .globe-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; text-align: center; padding: 0 20px; }
+
+  .globe-reset {
+    position: absolute; right: 12px; bottom: 12px; z-index: 6;
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 500 12.5px/1 "Inter", sans-serif; color: var(--text);
+    background: rgba(15,18,38,0.88); border: 1px solid var(--line); border-radius: 999px;
+    padding: 8px 13px; cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .globe-reset:hover, .globe-reset:focus-visible { border-color: color-mix(in srgb, var(--teal) 60%, transparent); color: #fff; outline: none; }
 
   .globe-panel {
-    position: absolute; left: 12px; top: 12px; z-index: 5; width: min(300px, calc(100% - 24px));
+    position: absolute; left: 12px; top: 12px; z-index: 6; width: min(300px, calc(100% - 24px));
     border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px 12px;
     background: rgba(15,18,38,0.94);
   }
@@ -58,19 +68,36 @@ const data = await getGlobeData();
   .gp-close:hover { color: var(--text); }
   .globe-remote { margin-top: 14px; }
 
-  /* pins are DOM buttons placed by globe.gl, so style them globally */
+  /* Pins are DOM elements placed by globe.gl, so they are styled globally.
+     The button is a zero size anchor at the exact location; the pin tip sits on it. */
   :global(.gpin) {
-    --s: 12px; width: var(--s); height: var(--s); border-radius: 50%; padding: 0; cursor: pointer;
-    border: 0; background: var(--teal); pointer-events: auto; transform: translate(-50%, -50%);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 22%, transparent), 0 0 14px 2px color-mix(in srgb, var(--teal) 55%, transparent);
-    transition: box-shadow .2s, transform .2s;
+    position: relative; width: 0; height: 0; padding: 0; border: 0; background: none;
+    cursor: pointer; pointer-events: auto; transition: opacity .25s;
   }
-  :global(.gpin:hover), :global(.gpin:focus-visible) { transform: translate(-50%, -50%) scale(1.25); outline: none; }
-  :global(.gpin.empty) { background: color-mix(in srgb, var(--teal) 45%, #0F1226); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 14%, transparent); }
-  :global(.gpin.cluster) {
-    display: grid; place-items: center; font: 600 11px/1 "Space Grotesk", sans-serif; color: #0F1226;
-    background: var(--teal);
+  :global(.gpin .gicon) {
+    position: absolute; left: -11px; bottom: -1px; width: 22px; height: 30px;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 8px color-mix(in srgb, var(--teal) 45%, transparent));
+    transform-origin: 50% 100%; transition: transform .18s;
   }
+  :global(.gpin .glabel) {
+    position: absolute; left: 13px; bottom: 14px; white-space: nowrap;
+    font: 500 12px/1 "Space Grotesk", sans-serif; letter-spacing: 0.01em; color: #fff;
+    background: rgba(10,12,24,0.78); border: 1px solid rgba(233,231,245,0.14);
+    padding: 4px 7px; border-radius: 6px;
+  }
+  :global(.gpin .gnum) {
+    position: absolute; left: -7px; bottom: 13px; width: 14px; text-align: center;
+    font: 600 10px/14px "Space Grotesk", sans-serif; color: #0F1226; pointer-events: none;
+  }
+  :global(.gpin:hover .gicon), :global(.gpin:focus-visible .gicon) { transform: scale(1.18); }
+  :global(.gpin:focus-visible) { outline: none; }
+  :global(.gpin:focus-visible .glabel) { border-color: var(--teal); }
+  :global(.gpin.empty .gicon) { opacity: 0.6; }
+  :global(.gpin.empty .glabel) { color: var(--muted); }
+  :global(.gpin.hidden) { opacity: 0; pointer-events: none; }
+  :global(.gpin.flip .glabel) { left: auto; right: 13px; }
+  :global(.gpin.quiet .glabel) { opacity: 0; transition: opacity .15s; }
+  :global(.gpin.quiet:hover .glabel), :global(.gpin.quiet:focus-visible .glabel) { opacity: 1; z-index: 2; }
 </style>
 
 <script>
@@ -80,10 +107,16 @@ const data = await getGlobeData();
   type Data = { pins: Pin[]; arcs: Arc[]; remote: Item[]; accents: Record<string, string> };
   type Cluster = { key: string; lat: number; lng: number; pins: Pin[]; el?: HTMLElement };
 
+  const HOME = { lat: 30, lng: 10, altitude: 1.95 };
+  const PIN_SVG =
+    '<svg class="gicon" viewBox="0 0 22 30" aria-hidden="true"><path d="M11 29s9-9.2 9-17A9 9 0 0 0 2 12c0 7.8 9 17 9 17z" fill="#2DD4BF" stroke="#0F1226" stroke-width="1.5"/><circle cx="11" cy="11.5" r="3.6" fill="#0F1226"/></svg>';
+
   const host = document.getElementById('globe') as HTMLElement | null;
   const statusEl = document.getElementById('globe-status');
   const panel = document.getElementById('globe-panel') as HTMLElement | null;
+  const resetBtn = document.getElementById('globe-reset') as HTMLButtonElement | null;
   const raw = document.getElementById('globe-data')?.textContent;
+  const say = (t: string) => { if (statusEl) statusEl.textContent = t; };
 
   const hasWebGL = () => {
     try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
@@ -91,13 +124,14 @@ const data = await getGlobeData();
 
   function start() {
     if (!host || !raw) return;
-    if (!hasWebGL()) { if (statusEl) statusEl.textContent = 'The globe needs WebGL. Every page is still in the menu.'; return; }
-    import('globe.gl').then(({ default: Globe }) => mount(Globe, JSON.parse(raw) as Data)).catch(() => {
-      if (statusEl) statusEl.textContent = 'The globe could not load. Every page is still in the menu.';
-    });
+    if (!hasWebGL()) return say('The globe needs WebGL. Every page is still in the menu.');
+    say('Loading globe…');
+    import('globe.gl')
+      .then(({ default: Globe }) => mount(Globe, JSON.parse(raw) as Data))
+      .catch(() => say('The globe could not load. Every page is still in the menu.'));
   }
 
-  // Great circle distance in degrees, used for clustering nearby pins.
+  // Great circle distance in degrees.
   const deg = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
     const r = Math.PI / 180, s = Math.sin, c = Math.cos;
     const x = s(a.lat * r) * s(b.lat * r) + c(a.lat * r) * c(b.lat * r) * c((a.lng - b.lng) * r);
@@ -105,6 +139,8 @@ const data = await getGlobeData();
   };
   // Pins closer than this many degrees merge into one cluster; shrinks as you zoom in.
   const threshold = (altitude: number) => altitude * 1.5;
+  // Short name for the pin label: the part before the first comma.
+  const short = (label: string) => label.split(',')[0].trim();
 
   function clusterPins(pins: Pin[], altitude: number): Cluster[] {
     const out: Cluster[] = [];
@@ -122,76 +158,102 @@ const data = await getGlobeData();
 
   function mount(Globe: any, data: Data) {
     if (!host) return;
-    statusEl?.remove();
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // dot sphere: the halftone motif carried by the globe itself
-    const dots: { lat: number; lng: number }[] = [];
-    const N = 1800;
-    for (let i = 0; i < N; i++) {
-      const y = 1 - (i / (N - 1)) * 2, t = i * 2.399963;
-      dots.push({ lat: Math.asin(y) * 180 / Math.PI, lng: ((t * 180 / Math.PI) % 360) - 180 });
-    }
-
     const box = host.getBoundingClientRect();
+
     const globe = new Globe(host, { rendererConfig: { antialias: true, alpha: true } })
       .width(box.width).height(box.width)
       .backgroundColor('rgba(0,0,0,0)')
-      .showAtmosphere(true).atmosphereColor('#2DD4BF').atmosphereAltitude(0.14)
-      .pointsData(dots).pointLat('lat').pointLng('lng')
-      .pointAltitude(0.002).pointRadius(0.32).pointResolution(12)
-      .pointColor(() => 'rgba(233,231,245,0.30)').pointsMerge(true)
+      .globeImageUrl('/globe/earth-night.jpg')
+      .bumpImageUrl('/globe/earth-topology.jpg')
+      .showAtmosphere(true).atmosphereColor('#5fb8ff').atmosphereAltitude(0.18)
+      .onGlobeReady(() => {
+        statusEl?.remove();
+        // let the city lights glow on their own instead of being dimmed by scene lighting
+        const m = globe.globeMaterial();
+        if (m.map) { m.emissiveMap = m.map; m.emissive?.set?.('#ffffff'); m.emissiveIntensity = 0.75; m.needsUpdate = true; }
+      })
+      // pulsing rings mark every place
+      .ringsData(reduce ? [] : data.pins)
+      .ringLat('lat').ringLng('lng')
+      .ringColor((p: Pin) => (t: number) => `rgba(45,212,191,${(p.items.length ? 0.85 : 0.4) * (1 - t)})`)
+      .ringMaxRadius(3.2).ringPropagationSpeed(1.6).ringRepeatPeriod(1700)
+      // arcs
       .arcsData(data.arcs)
-      .arcColor((a: Arc) => (a.kind === 'bio' ? '#FB923C' : 'rgba(167,139,250,0.85)'))
-      .arcStroke((a: Arc) => (a.kind === 'bio' ? 0.55 : 0.3 + 0.12 * Math.sqrt(a.weight)))
+      .arcColor((a: Arc) => (a.kind === 'bio' ? '#FB923C' : 'rgba(167,139,250,0.9)'))
+      .arcStroke((a: Arc) => (a.kind === 'bio' ? 0.4 : 0.22 + 0.08 * Math.sqrt(a.weight)))
       .arcDashLength((a: Arc) => (a.kind === 'bio' ? 0.05 : 1))
       .arcDashGap((a: Arc) => (a.kind === 'bio' ? 0.035 : 0))
       .arcDashAnimateTime((a: Arc) => (a.kind === 'bio' && !reduce ? 6000 : 0))
       .arcAltitudeAutoScale(0.35)
-      // connected work flies lower than the journey, so the two never sit on one line
+      // connected work flies lower than the journey, so the two separate from most angles
       .arcAltitude((a: Arc) => (a.kind === 'theme' ? (deg({ lat: a.startLat, lng: a.startLng }, { lat: a.endLat, lng: a.endLng }) / 57.3) * 0.16 : null))
       .arcLabel((a: Arc) => a.label)
-      .htmlLat('lat').htmlLng('lng').htmlAltitude(0.005)
-      .htmlElement((c: Cluster) => c.el!);
-
-    globe.globeMaterial().color.set('#0d1030');
-    globe.globeMaterial().emissive?.set?.('#0b0e24');
+      // pins
+      .htmlLat('lat').htmlLng('lng').htmlAltitude(0.01)
+      .htmlElement((c: Cluster) => c.el!)
+      .htmlElementVisibilityModifier((el: HTMLElement, visible: boolean) => el.classList.toggle('hidden', !visible));
 
     const controls = globe.controls();
     controls.autoRotate = !reduce;
     controls.autoRotateSpeed = 0.35;
-    controls.minDistance = 112;
+    controls.minDistance = 135; // closer than this the Earth texture turns blocky
     controls.maxDistance = 600;
-    host.addEventListener('pointerdown', () => (controls.autoRotate = false), { once: true });
+    host.addEventListener('pointerdown', () => (controls.autoRotate = false));
 
-    globe.pointOfView({ lat: 40, lng: 10, altitude: 2.2 }, 0);
+    globe.pointOfView(HOME, 0);
 
-    // pins, rebuilt only when the cluster grouping changes
+    // --- view helpers -----------------------------------------------------
+    const flyTo = (lat: number, lng: number, altitude: number) => {
+      controls.autoRotate = false;
+      globe.pointOfView({ lat, lng, altitude }, 900);
+    };
+    const resetView = () => {
+      if (panel) panel.hidden = true;
+      globe.pointOfView(HOME, 1000);
+      setTimeout(() => (controls.autoRotate = !reduce), 1000);
+    };
+    const syncReset = (altitude: number) => {
+      if (resetBtn) resetBtn.hidden = altitude > HOME.altitude * 0.85 && (!panel || panel.hidden);
+    };
+    resetBtn?.addEventListener('click', resetView);
+    panel?.querySelector('.gp-close')?.addEventListener('click', resetView);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') resetView(); });
+
+    // --- pins, rebuilt only when the cluster grouping changes ----------------
     let currentKeys = '';
     const elFor = (c: Cluster) => {
       const b = document.createElement('button');
       b.type = 'button';
-      const count = c.pins.reduce((t, p) => t + p.items.length, 0);
+      b.innerHTML = PIN_SVG;
+      const label = document.createElement('span');
+      label.className = 'glabel';
+      b.append(label);
       if (c.pins.length > 1) {
         b.className = 'gpin cluster';
-        b.textContent = String(c.pins.length);
+        label.textContent = `${c.pins.length} places`;
+        const num = document.createElement('span');
+        num.className = 'gnum'; num.textContent = String(c.pins.length);
+        b.append(num);
         b.setAttribute('aria-label', `${c.pins.length} places close together. Zoom in.`);
-        b.style.setProperty('--s', '22px');
         b.addEventListener('click', (e) => {
           e.stopPropagation();
           // zoom until the closest two pins in the cluster fall under the split distance
           let closest = Infinity;
           for (const a of c.pins) for (const q of c.pins) if (a !== q) closest = Math.min(closest, deg(a, q));
-          globe.pointOfView({ lat: c.lat, lng: c.lng, altitude: Math.max(0.13, (closest / 1.5) * 0.4) }, 900);
-          controls.autoRotate = false;
+          flyTo(c.lat, c.lng, Math.max(0.36, (closest / 1.5) * 0.75));
         });
       } else {
         const p = c.pins[0];
+        const count = p.items.length;
         b.className = count ? 'gpin' : 'gpin empty';
+        label.textContent = short(p.label);
         b.setAttribute('aria-label', `${p.label}: ${count} ${count === 1 ? 'item' : 'items'}`);
-        b.title = p.label;
-        b.style.setProperty('--s', `${Math.round(10 + 4 * Math.sqrt(count))}px`);
-        b.addEventListener('click', (e) => { e.stopPropagation(); openPanel(p); controls.autoRotate = false; });
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openPanel(p);
+          flyTo(p.lat, p.lng, Math.min(globe.pointOfView().altitude, 1.4));
+        });
       }
       return b;
     };
@@ -203,10 +265,10 @@ const data = await getGlobeData();
       clusters.forEach((c) => (c.el = elFor(c)));
       globe.htmlElementsData(clusters);
     };
-    refresh(globe.pointOfView().altitude);
-    globe.onZoom((pov: { altitude: number }) => refresh(pov.altitude));
+    refresh(HOME.altitude);
+    globe.onZoom((pov: { altitude: number }) => { refresh(pov.altitude); syncReset(pov.altitude); });
 
-    // location panel
+    // --- location panel ---------------------------------------------------
     function openPanel(p: Pin) {
       if (!panel) return;
       (panel.querySelector('.gp-title') as HTMLElement).textContent = p.label;
@@ -223,9 +285,30 @@ const data = await getGlobeData();
         li.append(a); list.append(li);
       }
       panel.hidden = false;
+      if (resetBtn) resetBtn.hidden = false;
     }
-    panel?.querySelector('.gp-close')?.addEventListener('click', () => (panel.hidden = true));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel) panel.hidden = true; });
+
+    // --- label collisions --------------------------------------------------
+    // Labels that would overlap another label or run off the globe box flip to
+    // the left of their pin; if that still collides they hide until hover.
+    const placeLabels = () => {
+      const hostBox = host.getBoundingClientRect();
+      const placed: DOMRect[] = [];
+      const hits = (r: DOMRect) =>
+        r.left < hostBox.left || r.right > hostBox.right ||
+        placed.some((q) => r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top);
+      const pins = [...host.querySelectorAll<HTMLElement>('.gpin:not(.hidden)')];
+      for (const pin of pins) {
+        const label = pin.querySelector<HTMLElement>('.glabel');
+        if (!label) continue;
+        pin.classList.remove('flip', 'quiet');
+        let r = label.getBoundingClientRect();
+        if (hits(r)) { pin.classList.add('flip'); r = label.getBoundingClientRect(); }
+        if (hits(r)) { pin.classList.remove('flip'); pin.classList.add('quiet'); continue; }
+        placed.push(r);
+      }
+    };
+    setInterval(placeLabels, 200);
 
     // keep the canvas sized to its box
     const fit = () => { const r = host.getBoundingClientRect(); globe.width(r.width).height(r.height); };

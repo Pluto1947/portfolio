@@ -3,7 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Globe from '../components/Globe.astro';
 import { getDomains, itemsInDomain, accentFor, labelFor } from '../lib/graph';
 
-// Home: intro and domain colour key on one side, the globe on the other.
+// Home: the globe alone in the hero, with the domain colour key and the arc
+// legend as one small row underneath.
 const domains = await Promise.all(
   (await getDomains()).map(async (d) => ({ domain: d, count: (await itemsInDomain(d)).length })),
 );
@@ -11,41 +12,49 @@ const domains = await Promise.all(
 
 <BaseLayout title="Dan · Portfolio">
   <section class="hero">
-   <div class="intro">
-    <span class="eyebrow">Placeholder</span>
-    <h1>The arc is the map.</h1>
-    <p>Drag the globe. Click a pin to see what was made there.</p>
+    <h1 class="sr-only">Dan: portfolio</h1>
+    <Globe />
 
-    <ul class="domlist">
-      {domains.map((d) => (
-        <li>
-          <a class="rlink" href={`/${d.domain}`} style={`--d:${accentFor(d.domain)}`}>
-            {labelFor(d.domain)}<span class="n">{d.count > 0 ? `${d.count} ${d.count === 1 ? 'item' : 'items'}` : 'coming soon'}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-    <a class="back" href="/sitemap">All pages ›</a>
-   </div>
-   <div class="viz"><Globe /></div>
+    <div class="key">
+      <ul class="domkey" aria-label="Domains">
+        {domains.map((d) => (
+          <li>
+            <a href={`/${d.domain}`} style={`--d:${accentFor(d.domain)}`}>
+              {labelFor(d.domain)}<span class="n">{d.count > 0 ? d.count : 'soon'}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="arckey" aria-hidden="true">
+        <span class="lg bio">journey</span>
+        <span class="lg theme">connected work</span>
+      </div>
+    </div>
   </section>
 </BaseLayout>
 
 <style>
   .hero {
-    display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: center; gap: clamp(20px, 4vw, 56px);
-    min-height: 100vh; padding: clamp(24px, 5vw, 72px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    min-height: 100vh; padding: clamp(12px, 3vw, 40px) clamp(16px, 4vw, 48px);
   }
-  .intro { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-  .viz { min-width: 0; max-width: 680px; width: 100%; justify-self: center; }
-  @media (max-width: 1000px) { .hero { grid-template-columns: minmax(0, 1fr); } }
-  .eyebrow { font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--teal); font-weight: 500; }
-  .hero h1 {
-    font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: clamp(30px, 5vw, 52px);
-    margin: 0; line-height: 1.06; text-wrap: balance; max-width: 14ch;
-  }
-  .hero p { color: var(--muted); max-width: 48ch; line-height: 1.6; margin: 0; font-size: 15px; }
-  .domlist { list-style: none; margin: 6px 0 0; padding: 0; max-width: 340px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  @media (max-width: 620px) { .hero { min-height: auto; padding: 40px 22px 64px; } }
+  .key { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .domkey { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; }
+  .domkey a {
+    display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+    font-size: 12.5px; color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px;
+    transition: border-color .2s;
+  }
+  .domkey a::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--d); box-shadow: 0 0 8px 0 var(--d); }
+  .domkey a:hover { border-color: color-mix(in srgb, var(--d) 60%, transparent); }
+  .domkey .n { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+
+  .arckey { display: flex; gap: 16px; font-size: 11.5px; color: var(--muted); }
+  .lg::before { content: ""; display: inline-block; width: 18px; border-top: 2px solid; margin-right: 7px; vertical-align: middle; }
+  .lg.bio::before { border-top-style: dashed; border-color: var(--coral); }
+  .lg.theme::before { border-color: var(--violet); }
+
+  @media (max-width: 620px) { .hero { min-height: auto; padding-top: 24px; } }
 </style>
