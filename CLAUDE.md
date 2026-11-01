@@ -59,3 +59,30 @@ npm run build
 
 - Confirm the CI frontmatter check still passes if any content files were touched.
 - List any decisions that were deferred (per "Things to never guess" above) so they're easy to pick up next session instead of getting lost.
+
+## Deploys cost credits
+
+- `main` auto-deploys to Netlify. Each production deploy costs 15 of 300 free monthly credits. At zero the site goes offline until the monthly reset.
+- Never push to `main` unless Dan says "deploy". Work on a branch and commit there freely.
+- Don't open pull requests unless asked. Netlify deploy previews can also spend credits.
+- Verify with `npm run build` and `npm run preview`. Both are free. Use artifacts for design reviews.
+- Netlify stays the host because Phase 4 needs Netlify Forms.
+
+## Content formatting
+
+The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-ups:
+
+- Headers are bold.
+- Definitions: bold term, colon, explanation.
+- Lists are real lists, one item per line. Never comma-join items onto one line.
+- Short sentences. Split a long one into two.
+- Prefer UI over prose. A paragraph that is really a list becomes chips, counts or badges.
+- Dan may still revise the content page structure. Treat the current layout as a baseline and wait for his direction before large content layout rebuilds.
+- Apply the no-dash rule to chat replies too, not only files.
+
+## Current state
+
+- Phases 0 and 1 are done. Phase 2 (domain pages, content pages, fallback nav) is built and awaiting Dan's confirmation.
+- Already built ahead of schedule: tag filtering, hover previews, foldable groups and quick search. These were Dan's requests, so keep them.
+- Next: get Dan's Phase 2 sign off, then Phase 3 (globe and graph). The landing hero composition decision opens there. See Open questions in `AGENTS.md`.
+- Run `npm install` first in a fresh environment.
