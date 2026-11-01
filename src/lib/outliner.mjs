@@ -3,6 +3,7 @@ import { visit } from 'unist-util-visit';
 // rehype plugin: turn a rendered write-up into a Logseq-style collapsible outline.
 //  1. each `## heading` and the content under it becomes a foldable level-1 node.
 //  2. any list item that contains a nested list becomes a foldable node too.
+//  3. folds that contain an evidence figure start open.
 // Leaf list items stay as <li>. The arrow, bullet and halo are drawn in CSS.
 
 const bullet = () => ({ type: 'element', tagName: 'span', properties: { className: ['obul'] }, children: [] });
@@ -71,6 +72,20 @@ export function rehypeOutliner() {
           ],
         },
       ];
+    });
+
+    // 3. open any section that holds an evidence figure (recording or screenshot),
+    //    including the parent folds around it, so evidence is visible on arrival
+    const hasEvidence = (node) => {
+      let found = false;
+      visit(node, 'element', (n) => {
+        const cls = n.properties?.className;
+        if (n.tagName === 'figure' && (Array.isArray(cls) ? cls : [cls]).includes('evidence')) found = true;
+      });
+      return found;
+    };
+    visit(tree, 'element', (node) => {
+      if (node.tagName === 'details' && hasEvidence(node)) node.properties = { ...(node.properties || {}), open: true };
     });
   };
 }
