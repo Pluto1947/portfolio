@@ -31,7 +31,10 @@ img { max-width: 100%; }
 
 /* site frame: nav rail on the left, content to the right */
 .stage { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; min-height: 100vh; }
-main { min-width: 0; }
+main { min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
+.sitefoot { margin-top: auto; padding: 0 clamp(18px, 4vw, 52px) 32px; text-align: center; font-size: 12px; }
+.sitefoot a { color: var(--muted); text-decoration: none; }
+.sitefoot a:hover { color: var(--text); }
 
 @media (max-width: 620px) {
   .stage { display: block; }
@@ -55,7 +58,7 @@ main { min-width: 0; }
 .back { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); text-decoration: none; font-size: 13px; font-family: "Space Grotesk", sans-serif; letter-spacing: 0.03em; }
 .back:hover { color: var(--text); }
 .cols { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 52px; margin-top: 30px; align-items: start; }
-@media (max-width: 860px) { .cols { grid-template-columns: 1fr; gap: 34px; } .rail { position: static !important; order: 2; } }
+@media (max-width: 860px) { .cols { grid-template-columns: minmax(0, 1fr); gap: 34px; } .rail { position: static !important; order: 2; } }
 
 /* ===================== grouped domain list ===================== */
 .group { margin-bottom: 30px; }

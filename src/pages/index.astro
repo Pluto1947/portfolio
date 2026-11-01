@@ -1,15 +1,30 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getDomains, itemsInDomain, accentFor, labelFor } from '../lib/graph';
+
+// Placeholder home. The globe replaces this in Phase 3; until then it lists
+// every domain so the site is reachable with plain links.
+const domains = await Promise.all(
+  (await getDomains()).map(async (d) => ({ domain: d, count: (await itemsInDomain(d)).length })),
+);
 ---
 
-<BaseLayout title="Dan — portfolio">
+<BaseLayout title="Dan · Portfolio">
   <section class="hero">
     <span class="eyebrow">Placeholder</span>
     <h1>The arc is the map.</h1>
-    <p>
-      Navigation is locked and live. The landing hero — globe, dome composition — and the
-      domain/content page layouts are later phases; this page exists to host the real nav.
-    </p>
+    <p>The globe lands here in Phase 3. Until then, browse by domain.</p>
+
+    <ul class="domlist">
+      {domains.map((d) => (
+        <li>
+          <a class="rlink" href={`/${d.domain}`} style={`--d:${accentFor(d.domain)}`}>
+            {labelFor(d.domain)}<span class="n">{d.count > 0 ? `${d.count} ${d.count === 1 ? 'item' : 'items'}` : 'coming soon'}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a class="back" href="/sitemap">All pages ›</a>
   </section>
 </BaseLayout>
 
@@ -24,6 +39,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     margin: 0; line-height: 1.06; text-wrap: balance; max-width: 14ch;
   }
   .hero p { color: var(--muted); max-width: 48ch; line-height: 1.6; margin: 0; font-size: 15px; }
+  .domlist { list-style: none; margin: 6px 0 0; padding: 0; max-width: 340px; }
 
   @media (max-width: 620px) { .hero { min-height: auto; padding: 40px 22px 64px; } }
 </style>

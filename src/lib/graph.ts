@@ -79,9 +79,11 @@ export async function getItems(): Promise<Item[]> {
   return cache;
 }
 
+// Confirmed domains always get a page, even before they have content.
+// Any other domain found in content still gets one with no code change.
 export async function getDomains(): Promise<string[]> {
   const items = await getItems();
-  const set = new Set<string>();
+  const set = new Set<string>(Object.keys(DOMAIN_LABEL));
   for (const it of items) for (const d of it.domains) set.add(d);
   return [...set].sort();
 }

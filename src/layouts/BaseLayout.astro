@@ -26,7 +26,10 @@ const { title = 'Dan' } = Astro.props;
   <body>
     <div class="stage">
       <Nav />
-      <main><slot /></main>
+      <main>
+        <slot />
+        <footer class="sitefoot"><a href="/sitemap">All pages</a></footer>
+      </main>
     </div>
     <SiteUX />
   </body>

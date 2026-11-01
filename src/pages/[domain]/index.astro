@@ -20,7 +20,7 @@ const accent = accentFor(domain);
 const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
 ---
 
-<BaseLayout title={`${labelFor(domain)} — Dan`}>
+<BaseLayout title={`${labelFor(domain)} · Dan`}>
   <div class="page" style={`--accent:${accent}`}>
     <a class="back" href="/">‹ Home</a>
 
@@ -45,7 +45,7 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
 
     <div class="cols">
       <div class="listcol">
-        {groups.length === 0 && <p class="empty">No content here yet.</p>}
+        {groups.length === 0 && <p class="empty">Coming soon. Nothing has been published in this domain yet.</p>}
         {groups.map((g) => (
           <details class="group" open>
             <summary class="ghead"><span class="gname">{typeLabel(g.type)}</span><span class="gcount">{g.items.length}</span></summary>
