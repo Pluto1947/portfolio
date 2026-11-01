@@ -85,8 +85,9 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 
 ## Current state
 
+- Phases 0 to 3 and 5 are done; Phase 4 is built with its live test deferred. Now in Phase 6 (visual theming). `CHECKLIST.md` tracks Dan's deferred content, tests and later phase items: keep it updated.
 - Phases 0 to 3 are done. Phase 4 (contact form) is built on the branch: layout B (service cards plus form), picked by Dan. The real submission test is deferred by Dan: it needs form detection turned on in Netlify and one deploy to `main` (only when Dan says "deploy"). Dan asked to continue to Phase 5 meanwhile.
-- Phase 5 in progress. Done: evidence figures in write-ups (figure card frame, recordings play on click, screenshots open full size), with placeholder media in the example write-up. Also done: the site terminal, placement C (corner button or backtick on every page). Phase 5 is awaiting Dan's sign off. `whoami` text in `content/_terminal.json` is a placeholder for Dan.
+- Phase 5 in progress. Done: evidence figures in write-ups (figure card frame, recordings play on click, screenshots open full size), with placeholder media in the example write-up. Also done: the site terminal, placement C (corner button or backtick on every page). Phase 5 is signed off by Dan. `whoami` text in `content/_terminal.json` is a placeholder for Dan.
 - Services and the Contact intro line are placeholders. Dan will update `content/_services.json` and the intro later.
 - Deferred to Phase 6: a constellation or starfield background, designed together with the dome motif. Dan likes the idea.
 - Phases 0, 1 and 2 are done. Phase 2 was signed off by Dan after review fixes: coming soon pages for empty domains, About and Contact stubs, a `/sitemap` page with a footer link, and phone title wrapping.
