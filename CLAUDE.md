@@ -82,10 +82,11 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 
 ## Current state
 
+- Phases 0 to 3 are done. Next: Phase 4 (contact form).
 - Phases 0, 1 and 2 are done. Phase 2 was signed off by Dan after review fixes: coming soon pages for empty domains, About and Contact stubs, a `/sitemap` page with a footer link, and phone title wrapping.
 - The domain list on the placeholder home page stays for now as a colour key. Revisit it with the hero layout in Phase 3; the nav already covers plain link navigation.
 - Already built ahead of schedule: tag filtering, hover previews, foldable groups and quick search. These were Dan's requests, so keep them.
-- Phase 3 (globe and graph) is built and awaiting Dan's confirmation: globe.gl on the home page, lazy loaded, pins from `_locations.json`, journey and connected work arcs, clustering, a location panel on pin click, and zoom out through Reset view, closing the panel, or Escape. First version was rejected (beside the text, flat dotted look, weak pins, no zoom out); rebuilt to Dan's picks.
+- Phase 3 (globe and graph) is done and signed off by Dan: globe.gl on the home page, lazy loaded, pins from `_locations.json`, journey and connected work arcs, clustering, a location panel on pin click, and zoom out through Reset view, closing the panel, or Escape. First version was rejected (beside the text, flat dotted look, weak pins, no zoom out); rebuilt to Dan's picks.
 - Locations are mock: `placeholder-a/b/c` in `_locations.json`, with the example note and theory moved onto two of them. Swap in Dan's real places and `since` dates when he sends them; no code change needed.
 - Arc colours and fine styling are a baseline for Phase 6. Known detail for then: journey and connected work arcs between the same two places overlap when seen from straight above.
 - The globe bundle is about 2 MB before compression (three.js). It loads after the page renders, but size is worth a look in Phase 7.
