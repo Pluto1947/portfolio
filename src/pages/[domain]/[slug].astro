@@ -88,3 +88,47 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
     </div>
   </div>
 </BaseLayout>
+
+<dialog class="lightbox" id="lightbox" aria-label="Full size screenshot">
+  <form method="dialog"><button class="lb-close" aria-label="Close">×</button></form>
+  <img id="lightbox-img" alt="" />
+  <p class="lb-cap" id="lightbox-cap"></p>
+</dialog>
+
+<script>
+  import 'asciinema-player/dist/bundle/asciinema-player.css';
+
+  // Terminal recordings: load the player only when a visitor clicks play.
+  document.querySelectorAll<HTMLElement>('.evidence .cast').forEach((box) => {
+    const btn = box.querySelector<HTMLButtonElement>('.cast-play');
+    btn?.addEventListener('click', async () => {
+      btn.disabled = true;
+      try {
+        const AsciinemaPlayer = await import('asciinema-player');
+        box.replaceChildren();
+        AsciinemaPlayer.create(box.dataset.cast!, box, {
+          autoPlay: true, theme: 'aurora', fit: 'width', idleTimeLimit: 2,
+          terminalFontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+        });
+      } catch {
+        btn.disabled = false;
+        btn.lastElementChild!.textContent = 'Could not load, try again';
+      }
+    });
+  });
+
+  // Screenshots: open full size in a dialog. Escape, the close button or a click outside closes it.
+  const box = document.getElementById('lightbox') as HTMLDialogElement | null;
+  const big = document.getElementById('lightbox-img') as HTMLImageElement | null;
+  const cap = document.getElementById('lightbox-cap');
+  document.querySelectorAll<HTMLButtonElement>('.evidence .shot').forEach((b) => {
+    b.addEventListener('click', () => {
+      const img = b.querySelector('img');
+      if (!box || !big || !img) return;
+      big.src = img.currentSrc || img.src; big.alt = img.alt;
+      if (cap) cap.textContent = b.closest('figure')?.querySelector('.fig-t')?.textContent ?? '';
+      box.showModal();
+    });
+  });
+  box?.addEventListener('click', (e) => { if (e.target === box) box.close(); });
+</script>

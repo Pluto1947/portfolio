@@ -16,6 +16,7 @@
     "@astrojs/markdown-satteri": "^0.4.1",
     "@astrojs/mdx": "^8.0.1",
     "animejs": "^3.2.2",
+    "asciinema-player": "3.17.0",
     "astro": "^7.3.2",
     "globe.gl": "2.46.2",
     "unist-util-visit": "^5.1.0"

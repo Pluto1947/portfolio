@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 import { remarkWikiLinks } from './src/lib/wikilinks.mjs';
 import { rehypeOutliner } from './src/lib/outliner.mjs';
+import { remarkEvidence } from './src/lib/evidence.mjs';
 
 // Build a { slug: "/domain/slug" } map from the content folder so [[slug]]
 // wiki links resolve to real page URLs. Re-read on config load (restart dev on new folders).
@@ -30,7 +31,7 @@ export default defineConfig({
   integrations: [mdx()],
   markdown: {
     processor: unified({
-      remarkPlugins: [[remarkWikiLinks, { resolve: slugMap() }]],
+      remarkPlugins: [[remarkWikiLinks, { resolve: slugMap() }], remarkEvidence],
       rehypePlugins: [rehypeOutliner],
     }),
   },
