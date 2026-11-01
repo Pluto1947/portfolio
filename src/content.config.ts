@@ -1,6 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 import locations from '../content/_locations.json';
+import services from '../content/_services.json';
 
 // This schema IS the frontmatter validator. `astro build` (and CI) parse every
 // content file against it and fail on missing/malformed fields — see AGENTS.md
@@ -19,6 +20,19 @@ const locationSchema = z.record(
 const parsedLocations = locationSchema.safeParse(locations);
 if (!parsedLocations.success) {
   throw new Error(`content/_locations.json is invalid: ${parsedLocations.error.message}`);
+}
+
+// _services.json drives the topic cards on the Contact page; validated the same way.
+const serviceSchema = z.array(z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  badge: z.string().min(1).optional(),
+  icon: z.enum(['shield', 'code', 'chat', 'cloud', 'brain', 'star']).optional(),
+  accent: z.enum(['teal', 'violet', 'coral', 'web']).optional(),
+})).nonempty();
+const parsedServices = serviceSchema.safeParse(services);
+if (!parsedServices.success) {
+  throw new Error(`content/_services.json is invalid: ${parsedServices.error.message}`);
 }
 
 const locationSlugs = Object.keys(locations);

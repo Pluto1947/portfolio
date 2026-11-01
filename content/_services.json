@@ -1,0 +1,21 @@
+[
+  {
+    "title": "Free pentest",
+    "description": "PLACEHOLDER: one line on what you test and how.",
+    "badge": "free",
+    "icon": "shield",
+    "accent": "teal"
+  },
+  {
+    "title": "Web development",
+    "description": "PLACEHOLDER: one line on the kind of sites you build.",
+    "icon": "code",
+    "accent": "violet"
+  },
+  {
+    "title": "Something else",
+    "description": "Questions, collaboration, or just saying hello.",
+    "icon": "chat",
+    "accent": "coral"
+  }
+]
