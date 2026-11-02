@@ -3,6 +3,7 @@ import { glob } from 'astro/loaders';
 import locations from '../content/_locations.json';
 import services from '../content/_services.json';
 import terminal from '../content/_terminal.json';
+import site from '../content/_site.json';
 
 // This schema IS the frontmatter validator. `astro build` (and CI) parse every
 // content file against it and fail on missing/malformed fields — see AGENTS.md
@@ -44,6 +45,13 @@ const terminalSchema = z.object({
 const parsedTerminal = terminalSchema.safeParse(terminal);
 if (!parsedTerminal.success) {
   throw new Error(`content/_terminal.json is invalid: ${parsedTerminal.error.message}`);
+}
+
+// _site.json holds the name and one line intro shown on the home page.
+const siteSchema = z.object({ name: z.string().min(1), tagline: z.string().min(1) });
+const parsedSite = siteSchema.safeParse(site);
+if (!parsedSite.success) {
+  throw new Error(`content/_site.json is invalid: ${parsedSite.error.message}`);
 }
 
 const locationSlugs = Object.keys(locations);

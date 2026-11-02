@@ -1,18 +1,26 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Globe from '../components/Globe.astro';
+import site from '../../content/_site.json';
 import { getDomains, itemsInDomain, accentFor, labelFor } from '../lib/graph';
 
-// Home: the globe alone in the hero, with the domain colour key and the arc
-// legend as one small row underneath.
+// Home: the globe in the hero, with the domain colour key and the arc legend
+// as one small row underneath. The intro (option C) shows the name large over
+// a dimmed globe, then settles into the top corner after 2.5 s or on any
+// interaction. It never takes clicks, so the globe stays fully usable. On phones
+// it sits above the globe instead. Name and line come from content/_site.json.
 const domains = await Promise.all(
   (await getDomains()).map(async (d) => ({ domain: d, count: (await itemsInDomain(d)).length })),
 );
 ---
 
-<BaseLayout title="Dan · Portfolio">
-  <section class="hero">
-    <h1 class="sr-only">Dan: portfolio</h1>
+<BaseLayout title={`${site.name} · Portfolio`}>
+  <section class="hero" id="hero">
+    <div class="intro" id="intro" data-avoid>
+      <h1 class="name">{site.name}</h1>
+      <p class="line">{site.tagline}</p>
+      <p class="hint"><span class="mouse">Drag the globe, click a pin, or press <kbd>`</kbd> for the terminal</span><span class="touch">Drag the globe, tap a pin, or open the terminal</span></p>
+    </div>
     <Globe />
 
     <div class="key">
@@ -38,7 +46,42 @@ const domains = await Promise.all(
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
     min-height: 100vh; padding: 0 0 clamp(12px, 3vw, 32px);
   }
-  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .hero { position: relative; }
+
+  /* intro: centred over a dimmed globe, then settled in the corner */
+  .intro {
+    position: absolute; z-index: 4; pointer-events: none;
+    left: 50%; top: calc(50% - 40px); transform: translate(-50%, -50%);
+    width: min(90%, 760px); text-align: center;
+    transition: left .9s cubic-bezier(.2,.7,.2,1), top .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1), width .9s, opacity .6s;
+  }
+  .intro .name {
+    margin: 0; font-family: "Space Grotesk", sans-serif; font-weight: 700; line-height: 1.04; text-wrap: balance;
+    font-size: clamp(36px, 5.4vw, 68px); color: #dbfff7; transition: font-size .9s cubic-bezier(.2,.7,.2,1);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--teal) 55%, transparent), 1px 0 rgba(255,77,141,0.5), -1px 0 rgba(34,233,255,0.5);
+  }
+  .intro .line { margin: 10px 0 0; color: #d6d4ea; font-size: clamp(14px, 1.5vw, 18px); transition: font-size .9s; }
+  .intro .hint { margin: 10px 0 0; color: var(--muted); font-size: 12.5px; opacity: 0; transition: opacity .5s .5s; }
+  .intro .hint kbd { font: 11.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+  .intro .touch { display: none; }
+  @media (hover: none) { .intro .mouse { display: none; } .intro .touch { display: inline; } }
+  .hero.intro-on :global(.globe) { filter: brightness(0.38); transition: filter .9s; }
+  .hero :global(.globe) { transition: filter .9s; }
+
+  .intro.settled { left: clamp(16px, 3vw, 40px); top: clamp(16px, 4vh, 40px); transform: none; width: min(34%, 440px); text-align: left; }
+  .intro.settled .name { font-size: clamp(22px, 2.4vw, 32px); }
+  .intro.settled .line { font-size: 14px; }
+  .intro.settled .hint { opacity: 1; }
+
+  /* phones: no spare corner, so the intro sits above the globe in the page flow */
+  @media (max-width: 620px) {
+    .intro, .intro.settled { position: static; transform: none; width: auto; text-align: left; padding: 20px 16px 0; align-self: stretch; }
+    .intro .name, .intro.settled .name { font-size: 28px; }
+    .intro .line { font-size: 14px; }
+    .intro .hint { opacity: 1; }
+    .hero.intro-on :global(.globe) { filter: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .intro, .intro .name, .intro .line, .intro .hint, .hero :global(.globe) { transition: none; } }
 
   .key { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .domkey { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; }
@@ -57,5 +100,30 @@ const domains = await Promise.all(
   .lg.theme::before { border-color: var(--violet); }
 
   @media (max-width: 620px) { .hero { min-height: auto; } }
+
   .key { padding-inline: 16px; }
 </style>
+
+<script>
+  const hero = document.getElementById('hero');
+  const intro = document.getElementById('intro');
+  if (hero && intro) {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const phone = matchMedia('(max-width: 620px)').matches;
+    let seen = false;
+    try { seen = sessionStorage.getItem('introSeen') === '1'; } catch {}
+    const settle = () => {
+      if (intro.classList.contains('settled')) return;
+      intro.classList.add('settled'); hero.classList.remove('intro-on');
+      try { sessionStorage.setItem('introSeen', '1'); } catch {}
+      for (const ev of events) window.removeEventListener(ev, settle);
+    };
+    const events = ['pointerdown', 'wheel', 'keydown', 'touchstart'] as const;
+    if (seen || reduce || phone) settle();
+    else {
+      hero.classList.add('intro-on');
+      for (const ev of events) window.addEventListener(ev, settle, { passive: true });
+      setTimeout(settle, 2500);
+    }
+  }
+</script>

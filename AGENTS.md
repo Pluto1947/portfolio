@@ -60,6 +60,8 @@ A recurring background texture, used site-wide (not landing-page-only) so it rea
 
 **Landing hero composition, decided: Globe only.** Dan picked it in Phase 3 after comparing live mockups of Framed, Separated and Globe only. The globe fills the hero on its own, centred, with no heading; the domain colour key and arc legend sit as one small row under it. No dome layer, so nothing covers or clips the globe.
 
+**Home intro, confirmed (option C):** the name and a one line intro from `content/_site.json` show large in the centre over a dimmed globe, then glide to the top corner after 2.5 s or on the first click, touch, scroll or key press. The intro never takes pointer events, and globe pin labels treat it as an obstacle (any element with `data-avoid`). Returning to the home page in the same tab skips straight to the settled state, as does reduced motion. On phones it sits above the globe in the page flow. The name is the page's `h1`.
+
 **Globe look, confirmed in Phase 3:** a realistic night lights Earth (NASA imagery, public domain, self hosted in `public/globe/`) with relief and glowing city lights. No atmosphere glow, and no visible box: the globe draws across the whole hero and fades into the page background at every edge, so it sits on the background even when zoomed. Pins are teal map pin icons with the place name beside them and a pulsing ring; labels that collide flip sides or hide until hover. A Reset view button, closing the location panel, or Escape zooms back out. Fine tuning (colours, arc styling) stays open for Phase 6. The other hero candidates, for the record:
 1. **Merged** — the globe's lower half tucks behind the dome's front edge, reading as though it rises from the horizon (closest to the original mood reference).
 2. **Separated** — globe fully visible above, dome reduced to a thin strip at the bottom, no overlap.
@@ -114,6 +116,8 @@ summary: "one line, used as card preview text"
 `_locations.json` maps a location slug to `{ lat, lng, label, since? }`. Add new locations here once; content references the slug, never raw coordinates. Include a `remote` entry (no lat/lng) for content with no physical location — render these as a fallback list or orbiting element, not force-fit onto a country. `since` (`YYYY` or `YYYY-MM`, optional) is when Dan arrived there: locations with a `since` are joined in date order to draw the biographical arcs, so the journey is edited in this one file. The build validates this file like frontmatter. Entries labelled `PLACEHOLDER` are mock locations until Dan supplies real ones.
 
 `_services.json` lists the topic cards on the Contact page, in display order: `{ title, description, badge?, icon?, accent? }`. `icon` is one of `shield`, `code`, `chat`, `cloud`, `brain`, `star`; `accent` is one of `teal`, `violet`, `coral`, `web`. The chosen card's `title` arrives as the `topic` field of the message. Editing services is a content change, no code. The build validates this file too.
+
+`_site.json` holds `{ name, tagline }`: the name shown on the home page and in link previews, and the one line intro. Validated at build.
 
 `_template.md` is the copy-paste starting point for new content. Keep its body sections aligned to the write-up structure below. If the schema changes, update `_template.md` in the same commit.
 

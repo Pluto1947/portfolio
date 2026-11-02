@@ -15,6 +15,7 @@ Each of these is a content edit. None needs code.
   - Decide whether "Free pentest" keeps its `"badge": "free"`.
   - Add or remove services as you like.
 - [ ] **Contact intro line:** send the wording. It currently sits in `src/pages/contact.astro`.
+- [ ] **Home page line:** replace the placeholder `tagline` in `content/_site.json` (your name is already set there).
 - [ ] **Terminal `whoami` text:** edit `content/_terminal.json`. Add any extra fun commands there too, as `"name": "what it prints"`.
 - [ ] **About page:** currently a stub. Planned for Phase 8.
 - [ ] **Recordings for real write-ups:** record with asciinema and add them under Evidence.

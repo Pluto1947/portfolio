@@ -370,7 +370,8 @@ const data = await getGlobeData();
       const hostBox = host.getBoundingClientRect();
       const edge = hostBox.width * 0.1; // keep labels out of the faded edges
       type Box = { left: number; right: number; top: number; bottom: number };
-      const placed: Box[] = [];
+      // seed with page elements labels must avoid (for example the home intro)
+      const placed: Box[] = [...document.querySelectorAll<HTMLElement>('[data-avoid]')].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0);
       const hits = (r: Box) =>
         r.left < hostBox.left + edge || r.right > hostBox.right - edge ||
         placed.some((q) => r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top);

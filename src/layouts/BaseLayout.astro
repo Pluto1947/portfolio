@@ -3,6 +3,7 @@ import Nav from '../components/Nav.astro';
 import SiteUX from '../components/SiteUX.astro';
 import SiteTerminal from '../components/SiteTerminal.astro';
 import Starfield from '../components/Starfield.astro';
+import site from '../../content/_site.json';
 // Fonts are served from the site itself (same Google Fonts files, latin set),
 // so no third party request blocks the first paint.
 import '@fontsource/inter/latin-400.css';
@@ -37,7 +38,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
     {noindex && <meta name="robots" content="noindex" />}
     <!-- link previews (LinkedIn, WhatsApp, Slack, X) -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Dan" />
+    <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />

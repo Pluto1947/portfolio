@@ -96,4 +96,5 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 - Phase 3 (globe and graph) is done and signed off by Dan: globe.gl on the home page, lazy loaded, pins from `_locations.json`, journey and connected work arcs, clustering, a location panel on pin click, and zoom out through Reset view, closing the panel, or Escape. First version was rejected (beside the text, flat dotted look, weak pins, no zoom out); rebuilt to Dan's picks.
 - Locations are mock: `placeholder-a/b/c` in `_locations.json`, with the example note and theory moved onto two of them. Swap in Dan's real places and `since` dates when he sends them; no code change needed.
 - Phase 7 work is built: smaller globe bundle (stubs), WebP texture, self hosted fonts, lite mode, starfield optimisation, skip link, headings, descriptions. Awaiting Dan's sign off; the real low end phone test is Dan's to do.
+- After Phase 7: launch polish (link previews, icon, 404, sitemap) and the home intro (option C) are built. Dan's name is Adewuyi Samuel Dan (in `content/_site.json`); his one line intro is still a placeholder.
 - Run `npm install` first in a fresh environment.
