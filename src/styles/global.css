@@ -176,3 +176,22 @@ details:not([open]) > .osum .obul { box-shadow: 0 0 0 4px color-mix(in srgb, var
 .lightbox img { display: block; max-width: 100%; max-height: calc(94vh - 52px); width: auto; height: auto; margin: 0 auto; }
 .lightbox .lb-cap { margin: 0; padding: 10px 44px 12px 14px; font-size: 13px; color: var(--muted); }
 .lightbox .lb-close { position: absolute; top: 6px; right: 8px; z-index: 1; background: rgba(15,18,38,0.85); border: 1px solid var(--line); color: var(--text); border-radius: 999px; width: 32px; height: 32px; font-size: 18px; line-height: 1; cursor: pointer; }
+
+/* ===================== page transitions ===================== */
+/* Native cross document view transitions: no JavaScript, so every page script
+   still runs normally. Browsers without support just change page instantly. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 240ms; animation-timing-function: ease; }
+/* things that live on every page stay put instead of fading */
+.starfield { view-transition-name: starfield; }
+nav[aria-label="Main"] { view-transition-name: site-nav; }
+.st-fab { view-transition-name: terminal-fab; }
+::view-transition-group(starfield), ::view-transition-group(site-nav), ::view-transition-group(terminal-fab) { animation: none; }
+::view-transition-old(starfield), ::view-transition-old(site-nav), ::view-transition-old(terminal-fab) { display: none; }
+::view-transition-new(starfield), ::view-transition-new(site-nav), ::view-transition-new(terminal-fab) { animation: none; }
+/* page titles glide from one page's position to the next */
+.vC-wrap { view-transition-name: page-title; }
+::view-transition-group(page-title) { animation-duration: 320ms; animation-timing-function: cubic-bezier(.2,.7,.2,1); }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}

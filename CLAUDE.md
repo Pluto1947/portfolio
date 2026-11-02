@@ -20,7 +20,7 @@ This file is for Claude Code specifically. **Read `AGENTS.md` first** — it's t
 - Site generator: **Astro**, content collections + MDX. Chosen over Quartz because Astro View Transitions (used in the animation stack below) requires the Astro framework, and this build's amount of custom compositing suits Astro's flexibility better than Quartz's opinionated structure.
 - Palette "Aurora indigo": bg `#0F1226`, text `#E9E7F5`, accents `#2DD4BF` (teal), `#A78BFA` (violet), `#FB923C` (coral).
 - Typography "Geometric modern": Space Grotesk 500 for headings, Inter 400/500 for body (Google Fonts).
-- Animation stack: Astro View Transitions (page nav), GSAP + ScrollTrigger (scroll reveals), Anime.js (UI micro-interactions). See `AGENTS.md` Stack section for which layer handles what — don't blend their responsibilities or add a fourth library.
+- Animation stack: native View Transitions in CSS (page nav) and Anime.js (UI micro-interactions). GSAP was dropped by Dan. See `AGENTS.md` Stack section for which layer handles what — don't add another library.
 - Background motif: dot-halftone dome/horizon texture + flat scrim overlay, used site-wide (full version on landing, subtler echo elsewhere). See `AGENTS.md` "Confirmed design decisions" for the exact composition and implementation notes — exact shape/ring details are still refinable in Phase 6, don't treat those as needing another round of options first.
 
 - Landing hero: **Globe only**, centred, no heading, domain key as a small row under it. Picked in Phase 3.

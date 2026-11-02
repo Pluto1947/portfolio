@@ -80,11 +80,10 @@ Trade-offs found in Phase 3: Framed needs zoom limits or a fading frame, because
 - **CI**: GitHub Actions. One required job: validate frontmatter schema on every push (see Content schema below) and fail the build on missing/malformed fields. Deploys are **not** an Actions job — Netlify's GitHub integration builds and publishes on every push to `main`, so a deploy workflow here would only duplicate it.
 - **Terminal/practical demos**: asciinema `.cast` recordings, embedded directly — preferred over static screenshots for anything CLI-based. Played with `asciinema-player`, themed to the palette. Plus one **scripted interactive terminal** somewhere on the site (Dan's pick in Phase 5): visitors type from a set of defined commands that navigate the site and replay recordings; no live shell and no backend. Placement **C**, picked by Dan: a corner "&gt;_ Terminal" button on every page, or the backtick key, opens it over the page (`src/components/SiteTerminal.astro`). Commands: `help`, `whoami`, `ls`, `cd`, `open`, `play`, `contact`, `home`, `clear`, built from content at build time. `content/_terminal.json` holds the `whoami` text and extra fixed commands (`{ "name": "output" }`); built in commands win on a name clash. Validated at build.
 - **CMS (optional, later phase)**: Decap CMS, git-based, only if Dan wants a form-based way to add content without touching markdown directly. Not required for MVP.
-- **Animation**: three-layer stack, each covering a different job —
-  - **Astro View Transitions** for page-to-page navigation (e.g. globe → domain page), native to Astro, no extra dependency.
-  - **GSAP + ScrollTrigger** for scroll-based content reveals on domain/write-up pages. Free (GSAP dropped its paywall, including ScrollTrigger).
+- **Animation**: two layers, each covering a different job (GSAP scroll reveals were dropped by Dan, so people skimming write-ups never wait on content):
+  - **View Transitions** for page-to-page navigation. Implemented as native cross document transitions in CSS (`@view-transition { navigation: auto; }` in `src/styles/global.css`), not Astro's `ClientRouter`: the router would stop page scripts (globe, starfield, terminal, nav) from re-running on navigation. Pages crossfade in 240 ms; the starfield, nav and terminal button stay put; page titles glide between positions. Unsupported browsers change page instantly. Reduced motion turns it off.
   - **Anime.js** for smaller in-page UI flourishes — graph/globe node entrances, hover states, button interactions.
-  - Don't reach for a fourth animation library without updating this section first — these three cover page transitions, scroll reveals, and micro-interactions between them.
+  - Don't add another animation library without updating this section first. Canvas effects (starfield, dome) are hand-written and not a library.
 
 ## Content schema (single source of truth)
 
