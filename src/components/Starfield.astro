@@ -25,26 +25,48 @@
       [6500, 0.85, 0.5, 3, 10, false],
       [26000, 1.45, 0.78, 6, 20, true],
     ];
-    type Star = { x: number; y: number; r: number; a: number; c: string; tw: boolean; ph: number };
+    const PAD = 24; // room for parallax above and below each layer
+    type Star = { x: number; y: number; r: number; a: number; c: string; ph: number };
+    type Layer = { drift: number; par: number; img: HTMLCanvasElement; twinkle: Star[]; glow: boolean };
     type Shot = { x: number; y: number; dx: number; dy: number; t0: number; dur: number; len: number };
-    let W = 0, H = 0;
-    let layers: { drift: number; par: number; glow: boolean; stars: Star[] }[] = [];
+    let W = 0, H = 0, dpr = 1;
+    let layers: Layer[] = [];
     const shots: Shot[] = [];
     let mx = 0, my = 0, tx = 0, ty = 0;
 
+    // soft glow, drawn once and stamped wherever a bright star needs it
+    const glowSprite = (() => {
+      const g = document.createElement('canvas'); g.width = g.height = 32;
+      const c = g.getContext('2d')!, grad = c.createRadialGradient(16, 16, 0, 16, 16, 16);
+      grad.addColorStop(0, 'rgba(233,231,245,0.35)'); grad.addColorStop(1, 'rgba(233,231,245,0)');
+      c.fillStyle = grad; c.fillRect(0, 0, 32, 32); return g;
+    })();
+
+    function dot(c: CanvasRenderingContext2D, s: Star, x: number, y: number, a: number, glow: boolean) {
+      if (glow) { c.globalAlpha = a; const d = s.r * 10; c.drawImage(glowSprite, x - d / 2, y - d / 2, d, d); c.globalAlpha = 1; }
+      c.fillStyle = `rgba(${s.c},${a})`; c.beginPath(); c.arc(x, y, s.r, 0, 7); c.fill();
+    }
+
+    // Each layer's still stars are drawn once into their own picture; every frame
+    // just slides those pictures, and only the few twinkling stars are redrawn.
     function size() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
       W = window.innerWidth; H = window.innerHeight;
       cv!.width = Math.round(W * dpr); cv!.height = Math.round(H * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
       const r = Math.random;
-      layers = LAYERS.map(([area, rad, al, drift, par, glow]) => ({
-        drift, par, glow,
-        stars: Array.from({ length: Math.round((W * H) / area) }, () => ({
-          x: r() * W, y: r() * H, r: rad * (0.7 + r() * 0.6), a: al * (0.6 + r() * 0.4),
-          c: TINTS[Math.floor(r() * TINTS.length)], tw: r() < 0.3, ph: r() * 6.28,
-        })),
-      }));
+      layers = LAYERS.map(([area, rad, al, drift, par, glow]) => {
+        const img = document.createElement('canvas');
+        img.width = Math.round(W * dpr); img.height = Math.round((H + PAD * 2) * dpr);
+        const c = img.getContext('2d')!; c.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const twinkle: Star[] = [];
+        const n = Math.round(((W * (H + PAD * 2)) / area));
+        for (let i = 0; i < n; i++) {
+          const s = { x: r() * W, y: r() * (H + PAD * 2), r: rad * (0.7 + r() * 0.6), a: al * (0.6 + r() * 0.4), c: TINTS[Math.floor(r() * TINTS.length)], ph: r() * 6.28 };
+          if (!reduce && r() < 0.06) twinkle.push(s); else dot(c, s, s.x, s.y, s.a, glow);
+        }
+        return { drift, par, img, twinkle, glow };
+      });
     }
 
     function fireShot() {
@@ -58,17 +80,14 @@
       mx += (tx - mx) * 0.05; my += (ty - my) * 0.05;
       const secs = reduce ? 0 : t / 1000;
       for (const L of layers) {
-        const ox = -mx * L.par, oy = -my * L.par;
-        for (const s of L.stars) {
-          const x = (((s.x - secs * L.drift + ox) % W) + W) % W, y = s.y + oy;
-          let a = s.a;
-          if (s.tw && !reduce) a *= 0.6 + 0.4 * Math.sin(t / 1100 + s.ph);
-          if (L.glow) {
-            const g = ctx!.createRadialGradient(x, y, 0, x, y, s.r * 5);
-            g.addColorStop(0, `rgba(${s.c},${a * 0.35})`); g.addColorStop(1, `rgba(${s.c},0)`);
-            ctx!.fillStyle = g; ctx!.beginPath(); ctx!.arc(x, y, s.r * 5, 0, 7); ctx!.fill();
-          }
-          ctx!.fillStyle = `rgba(${s.c},${a})`; ctx!.beginPath(); ctx!.arc(x, y, s.r, 0, 7); ctx!.fill();
+        const ox = ((((-secs * L.drift - mx * L.par) % W) + W) % W);
+        const oy = -PAD - my * L.par;
+        // the picture wraps sideways: draw it twice to cover the seam
+        ctx!.drawImage(L.img, ox, oy, W, H + PAD * 2);
+        ctx!.drawImage(L.img, ox - W, oy, W, H + PAD * 2);
+        for (const s of L.twinkle) {
+          const x = (((s.x + ox) % W) + W) % W, y = s.y + oy;
+          dot(ctx!, s, x, y, s.a * (0.6 + 0.4 * Math.sin(t / 1100 + s.ph)), L.glow);
         }
       }
       for (const sh of shots) {
@@ -88,7 +107,8 @@
     }
 
     size();
-    window.addEventListener('resize', () => { size(); if (reduce) draw(0); });
+    let rt: ReturnType<typeof setTimeout>;
+    window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { size(); draw(performance.now()); }, 150); });
     if (reduce) {
       draw(0);
     } else {

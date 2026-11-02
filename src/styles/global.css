@@ -31,6 +31,10 @@ img { max-width: 100%; }
 
 /* site frame: nav rail on the left, content to the right */
 .stage { display: grid; grid-template-columns: minmax(220px, 300px) 1fr; min-height: 100vh; }
+/* skip link: hidden until a keyboard user tabs to it */
+.skip { position: fixed; left: 12px; top: -60px; z-index: 200; padding: 10px 14px; border-radius: 8px; background: var(--teal); color: #0F1226; font-weight: 500; text-decoration: none; transition: top .15s; }
+.skip:focus { top: 12px; }
+main:focus { outline: none; }
 main { min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
 .sitefoot { margin-top: auto; padding: 0 clamp(18px, 4vw, 52px) 32px; text-align: center; font-size: 12px; }
 .sitefoot a { color: var(--muted); text-decoration: none; }
@@ -76,7 +80,7 @@ button.chip { cursor: pointer; background: transparent; font: inherit; font-size
 .filterbar { display: flex; align-items: center; gap: 12px; margin-top: 14px; min-height: 20px; }
 .filterbar .fnote { color: var(--muted); font-size: 12px; }
 .filterbar .fclear { color: var(--accent); font-size: 12px; background: none; border: 0; cursor: pointer; font: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
-.gname { font-family: "Space Grotesk", sans-serif; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+.gname { margin: 0; font-family: "Space Grotesk", sans-serif; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
 .gcount { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .grow { display: grid; grid-template-columns: 1fr auto; gap: 5px 16px; align-items: baseline; padding: 15px 4px; border-bottom: 1px solid rgba(233,231,245,0.05); text-decoration: none; transition: background .2s; }
 .grow:hover { background: rgba(255,255,255,0.02); }

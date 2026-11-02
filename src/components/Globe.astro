@@ -11,7 +11,7 @@ const data = await getGlobeData();
 ---
 
 <div class="globe-wrap">
-  <div class="globe" id="globe" role="img" aria-label="Interactive globe of places where content was made. Every item is also listed in the site navigation.">
+  <div class="globe" id="globe" role="region" aria-label="Interactive globe of places where content was made. Every item is also listed in the site navigation.">
     <p class="globe-status" id="globe-status"></p>
     <noscript><p class="globe-status">The globe needs JavaScript. Every page is still in the menu.</p></noscript>
   </div>
@@ -190,6 +190,19 @@ const data = await getGlobeData();
     return out;
   }
 
+  // No graphics hardware (software WebGL), very little memory, or Data Saver on.
+  function isWeakDevice() {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    if (nav.connection?.saveData) return true;
+    if (nav.deviceMemory !== undefined && nav.deviceMemory <= 2) return true;
+    try {
+      const gl = document.createElement('canvas').getContext('webgl');
+      const info = gl?.getExtension('WEBGL_debug_renderer_info');
+      const name = info ? String(gl!.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+      return /swiftshader|llvmpipe|software|basic render/i.test(name);
+    } catch { return false; }
+  }
+
   function mount(Globe: any, data: Data) {
     if (!host) return;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -198,7 +211,7 @@ const data = await getGlobeData();
     const globe = new Globe(host, { rendererConfig: { antialias: true, alpha: true } })
       .width(box.width).height(box.height)
       .backgroundColor('rgba(0,0,0,0)')
-      .globeImageUrl('/globe/earth-night.jpg')
+      .globeImageUrl('/globe/earth-night.webp')
       .bumpImageUrl('/globe/earth-topology.jpg')
       .showAtmosphere(false)
       .onGlobeReady(() => {
@@ -233,8 +246,29 @@ const data = await getGlobeData();
       .htmlElement((c: Cluster) => c.el!)
       .htmlElementVisibilityModifier((el: HTMLElement, visible: boolean) => el.classList.toggle('hidden', !visible));
 
+    // Phones often have 3x screens; drawing the globe at 1.5x looks the same
+    // and is much lighter. Pause entirely when the globe can't be seen.
+    globe.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    // Lite mode for weak devices (no graphics hardware, little memory, Data Saver)
+    // and for reduced motion: the globe draws, then only redraws while someone
+    // interacts with it or a camera move is running. It looks the same, minus idle spin.
+    const lite = reduce || isWeakDevice();
+    let onScreen = true, active = !lite, idleTimer: ReturnType<typeof setTimeout> | undefined;
+    const syncRunning = () => (onScreen && !document.hidden && active ? globe.resumeAnimation() : globe.pauseAnimation());
+    const wake = (ms = 1600) => {
+      if (!lite) return;
+      active = true; syncRunning();
+      clearTimeout(idleTimer); idleTimer = setTimeout(() => { active = false; syncRunning(); }, ms);
+    };
+    new IntersectionObserver((es) => { onScreen = es.some((e) => e.isIntersecting); syncRunning(); }).observe(host);
+    document.addEventListener('visibilitychange', syncRunning);
+    if (lite) {
+      for (const ev of ['pointerdown', 'pointermove', 'wheel', 'touchstart'] as const) host.addEventListener(ev, () => wake(), { passive: true });
+      setTimeout(() => wake(2500), 0); // let textures load and the first frames draw
+    }
+
     const controls = globe.controls();
-    controls.autoRotate = !reduce;
+    controls.autoRotate = !lite;
     controls.autoRotateSpeed = 0.35;
     controls.minDistance = 135; // closer than this the Earth texture turns blocky
     controls.maxDistance = 600;
@@ -244,13 +278,15 @@ const data = await getGlobeData();
 
     // --- view helpers -----------------------------------------------------
     const flyTo = (lat: number, lng: number, altitude: number) => {
+      wake(1400);
       controls.autoRotate = false;
       globe.pointOfView({ lat, lng, altitude }, 900);
     };
     const resetView = () => {
+      wake(1500);
       if (panel) panel.hidden = true;
       globe.pointOfView(HOME, 1000);
-      setTimeout(() => (controls.autoRotate = !reduce), 1000);
+      setTimeout(() => (controls.autoRotate = !lite), 1000);
     };
     const syncReset = (altitude: number) => {
       if (resetBtn) resetBtn.hidden = altitude > HOME.altitude * 0.85 && (!panel || panel.hidden);
@@ -272,7 +308,7 @@ const data = await getGlobeData();
         b.className = 'gpin cluster';
         label.textContent = `${c.pins.length} places`;
         const num = document.createElement('span');
-        num.className = 'gnum'; num.textContent = String(c.pins.length);
+        num.className = 'gnum'; num.textContent = String(c.pins.length); num.setAttribute('aria-hidden', 'true');
         b.append(num);
         b.setAttribute('aria-label', `${c.pins.length} places close together. Zoom in.`);
         b.addEventListener('click', (e) => {

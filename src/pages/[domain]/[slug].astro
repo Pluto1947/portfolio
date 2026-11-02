@@ -23,7 +23,7 @@ const locLabel = locationLabel(item.data.location);
 const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
 ---
 
-<BaseLayout title={`${item.data.title} · Dan`}>
+<BaseLayout title={`${item.data.title} · Dan`} description={item.data.summary}>
   <div class="page" style={`--accent:${accent}`}>
     <a class="back" href={`/${item.domain}`}>‹ {labelFor(item.domain)}</a>
 
