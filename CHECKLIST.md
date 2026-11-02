@@ -63,9 +63,13 @@ Each of these is a content edit. None needs code.
 - [x] Arc styling: connected work bows out to one side when it joins the same two places as a journey arc
 
 **Phase 7, performance and accessibility:**
-- [ ] Shrink the globe bundle. It is about 2 MB before compression and causes the "chunks larger than 500 kB" build warning.
-- [ ] Test on a low end phone and a slow connection
-- [ ] Accessibility pass: keyboard use, screen reader labels, colour contrast
+- [x] Shrink the globe bundle: 545 kB to 242 kB compressed, by stubbing globe layers the site never uses. Build warning resolved.
+- [x] Earth texture to WebP: 715 kB to 358 kB
+- [x] Fonts served from the site (no Google request blocking first paint)
+- [x] Globe lite mode for weak devices, and pausing when hidden or scrolled away
+- [x] Accessibility pass: axe finds no issues on any page type; skip link; keyboard order checked
+- [x] Page descriptions for search engines
+- [ ] Try the site on a real low end phone (only you can do this one)
 
 **Phase 8, content and launch:**
 - [ ] Bulk add real content

@@ -142,7 +142,12 @@ Every write-up body follows this structure (enforced by convention, not code):
   - Styling (confirmed in Phase 6): journey arcs are coral, dashed and animated; connected work is a low solid violet line. Where connected work joins the same two places as a journey arc, it bows out to one side ("side by side"), so the two never overlap from any angle. Connected work uses globe.gl's paths layer for this, since its arcs layer can't bend sideways.
 - **Globe pins**: one per location with coordinates, sized by content count at that location (a location with no content yet shows a dim pin). Nearby locations merge into a numbered cluster that splits as you zoom; clicking a cluster zooms in, clicking a pin lists its items. globe.gl has no built in clustering, so this is done in `src/components/Globe.astro`.
 - **Accessibility/SEO fallback**: every domain and content page must be reachable via plain HTML navigation independent of the WebGL globe. Built in Phase 2 as `/sitemap` (linked from the footer on every page) plus a domain list on the placeholder home page. The globe is the flagship experience, not the only entry point.
-- **Performance**: the globe should lazy-load after core page content renders, not block first paint.
+- **Performance**: the globe should lazy-load after core page content renders, not block first paint. Phase 7 additions:
+  - Unused globe.gl layers (map tiles, hexagons, heatmaps, 3D labels, polygons) are aliased to stubs in `astro.config.mjs` (`src/lib/globe-stubs/`), cutting the globe bundle from 545 kB to 242 kB compressed. Remove an alias before using that layer.
+  - Lite mode: on weak devices (software WebGL, 2 GB memory or less, Data Saver) and for reduced motion, the globe redraws only during interaction. It always pauses when hidden or off screen, and draws at 1.5x pixel density at most.
+  - Starfield layers are drawn once to offscreen canvases and slid each frame.
+  - Fonts are self hosted through `@fontsource` (same Google Fonts files, latin set). Hashed assets get year long cache headers in `netlify.toml`.
+  - Lighthouse (simulated slow phone): domain, write-up and Contact pages score 98 to 99 for performance; every page scores 100 for accessibility, best practices and SEO.
 
 ## Design principles
 

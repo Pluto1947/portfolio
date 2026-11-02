@@ -95,5 +95,5 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 - Already built ahead of schedule: tag filtering, hover previews, foldable groups and quick search. These were Dan's requests, so keep them.
 - Phase 3 (globe and graph) is done and signed off by Dan: globe.gl on the home page, lazy loaded, pins from `_locations.json`, journey and connected work arcs, clustering, a location panel on pin click, and zoom out through Reset view, closing the panel, or Escape. First version was rejected (beside the text, flat dotted look, weak pins, no zoom out); rebuilt to Dan's picks.
 - Locations are mock: `placeholder-a/b/c` in `_locations.json`, with the example note and theory moved onto two of them. Swap in Dan's real places and `since` dates when he sends them; no code change needed.
-- The globe bundle is about 2 MB before compression (three.js). It loads after the page renders, but size is worth a look in Phase 7.
+- Phase 7 work is built: smaller globe bundle (stubs), WebP texture, self hosted fonts, lite mode, starfield optimisation, skip link, headings, descriptions. Awaiting Dan's sign off; the real low end phone test is Dan's to do.
 - Run `npm install` first in a fresh environment.
