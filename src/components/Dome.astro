@@ -8,9 +8,11 @@
 <canvas class="dome" aria-hidden="true"></canvas>
 
 <style>
+  /* sized to its header, so a short header gets a smaller dome that never
+     spills into the content below */
   .dome { position: absolute; z-index: -1; pointer-events: none; display: block;
-    top: -40px; right: -4%; width: min(720px, 80%); height: 300px; }
-  @media (max-width: 620px) { .dome { width: 100%; right: 0; height: 220px; } }
+    top: -40px; right: -4%; width: min(720px, 80%); height: calc(100% + 64px); }
+  @media (max-width: 620px) { .dome { width: 100%; right: 0; } }
 </style>
 
 <script>

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Title from '../components/Title.astro';
+import Dome from '../components/Dome.astro';
 import services from '../../content/_services.json';
 
 // Contact page (layout B): service cards on the left choose the topic, the form
@@ -28,6 +29,7 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
   <div class="page">
     <a class="back" href="/">‹ Home</a>
     <header class="dhead">
+      <Dome />
       <Title text="Contact" />
       <p class="lead">PLACEHOLDER: an intro line in your own words.</p>
     </header>
@@ -97,7 +99,7 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
   .card {
     position: relative; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: start;
     border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px; cursor: pointer;
-    background: linear-gradient(180deg, rgba(27,32,67,0.4), rgba(22,26,53,0.25)); transition: border-color .2s, background .2s;
+    background: linear-gradient(180deg, rgba(27,32,67,0.9), rgba(22,26,53,0.88)); transition: border-color .2s, background .2s;
   }
   .card:hover { border-color: rgba(233,231,245,0.18); }
   .card input { position: absolute; opacity: 0; pointer-events: none; }
@@ -108,13 +110,13 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
   .tag { font: 500 10.5px/1 "Inter", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); border-radius: 999px; padding: 3px 7px; margin-left: 8px; vertical-align: 2px; }
   .d { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
 
-  .panel-form { display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--line); border-radius: 16px; padding: clamp(16px, 3vw, 24px); background: rgba(15,18,38,0.6); min-width: 0; }
+  .panel-form { display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--line); border-radius: 16px; padding: clamp(16px, 3vw, 24px); background: rgba(15,18,38,0.94); min-width: 0; }
   .picked { font-size: 13px; color: var(--muted); margin: 0; }
   .picked :global(b) { color: var(--text); font-weight: 500; }
   .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
   .field label { font-family: "Space Grotesk", sans-serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
   .field input, .field textarea {
-    width: 100%; font: inherit; font-size: 15px; color: var(--text); background: rgba(10,12,24,0.55);
+    width: 100%; font: inherit; font-size: 15px; color: var(--text); background: rgba(10,12,24,0.9);
     border: 1px solid rgba(233,231,245,0.18); border-radius: 10px; padding: 11px 13px; transition: border-color .2s, box-shadow .2s;
   }
   .field textarea { min-height: 140px; resize: vertical; }

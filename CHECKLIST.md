@@ -58,7 +58,7 @@ Each of these is a content edit. None needs code.
 **Phase 6, visual theming (now):**
 - [x] Starfield background: depth layers plus a shooting star every 1 to 3 minutes (version D)
 - [x] Dot dome behind domain page headers, not on the globe page
-- [ ] Decide whether the dome also goes behind other page headers (write-ups, Contact, About)
+- [x] Dome also behind the Contact and About headers (not write-ups)
 - [ ] Accent colour for the `web` domain (currently a placeholder tint)
 - [ ] Arc styling: journey and connected work arcs overlap when they join the same two places
 
