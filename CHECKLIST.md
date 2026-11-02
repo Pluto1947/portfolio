@@ -1,6 +1,6 @@
 # Checklist
 
-See `CONTENT.md` for how to edit each content file.
+See `CONTENT.md` for how to edit each content file. Run `npm run check:launch` for a live list of what still blocks launch.
 
 Things left for later and tests still to run. Tick them off as you go. Last updated during Phase 6.
 

@@ -41,6 +41,9 @@ npm run preview
 # Dan's one step local check: pull, install, build, then preview:
 npm run local
 
+# launch readiness report (placeholders, mock places, empty domains, links):
+npm run check:launch
+
 # frontmatter validation (this IS the CI check — schema in src/content.config.ts):
 npm run build
 ```
@@ -85,7 +88,7 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 
 ## Current state
 
-- Phases 0 to 3, 5 and 6 are done; Phase 4 is built with its live test deferred. Now in Phase 7 (performance and accessibility). `CHECKLIST.md` tracks Dan's deferred content, tests and later phase items: keep it updated.
+- Phases 0 to 3 and 5 to 7 are done; Phase 4 is built with its live test deferred. Now in Phase 8 (content and launch). `npm run check:launch` lists what still blocks launch. `CHECKLIST.md` tracks Dan's deferred content, tests and later phase items: keep it updated.
 - Phases 0 to 3 are done. Phase 4 (contact form) is built on the branch: layout B (service cards plus form), picked by Dan. The real submission test is deferred by Dan: it needs form detection turned on in Netlify and one deploy to `main` (only when Dan says "deploy"). Dan asked to continue to Phase 5 meanwhile.
 - Phase 5 in progress. Done: evidence figures in write-ups (figure card frame, recordings play on click, screenshots open full size), with placeholder media in the example write-up. Also done: the site terminal, placement C (corner button or backtick on every page). Phase 5 is signed off by Dan. `whoami` text in `content/_terminal.json` is a placeholder for Dan.
 - Services and the Contact intro line are placeholders. Dan will update `content/_services.json` and the intro later.
@@ -95,7 +98,7 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 - Already built ahead of schedule: tag filtering, hover previews, foldable groups and quick search. These were Dan's requests, so keep them.
 - Phase 3 (globe and graph) is done and signed off by Dan: globe.gl on the home page, lazy loaded, pins from `_locations.json`, journey and connected work arcs, clustering, a location panel on pin click, and zoom out through Reset view, closing the panel, or Escape. First version was rejected (beside the text, flat dotted look, weak pins, no zoom out); rebuilt to Dan's picks.
 - Locations are mock: `placeholder-a/b/c` in `_locations.json`, with the example note and theory moved onto two of them. Swap in Dan's real places and `since` dates when he sends them; no code change needed.
-- Phase 7 work is built: smaller globe bundle (stubs), WebP texture, self hosted fonts, lite mode, starfield optimisation, skip link, headings, descriptions. Awaiting Dan's sign off; the real low end phone test is Dan's to do.
+- Phase 7 work is built: smaller globe bundle (stubs), WebP texture, self hosted fonts, lite mode, starfield optimisation, skip link, headings, descriptions. Signed off by Dan; the real low end phone test is still Dan's to do.
 - After Phase 7: launch polish (link previews, icon, 404, sitemap) and the home intro (option C) are built. Dan's name is Adewuyi Samuel Dan (in `content/_site.json`); his one line intro is still a placeholder.
 - Item 11 done: everything Dan edits lives in `content/` (`_domains.json`, `_site.json` with links and CV, `_pages/about.md`, `_files/`). `CONTENT.md` is his editing guide. Keep it that way: never put editable text in `src/`.
 - Run `npm install` first in a fresh environment.
