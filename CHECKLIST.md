@@ -71,6 +71,13 @@ Each of these is a content edit. None needs code.
 - [x] Page descriptions for search engines
 - [ ] Try the site on a real low end phone (only you can do this one)
 
+**Launch polish (done):**
+- [x] Link preview image and tags (`public/og.png`), canonical links
+- [x] Site icon: "D." with the teal dot (`favicon.ico`, `apple-touch-icon.png`)
+- [x] Custom 404 page
+- [x] `sitemap-index.xml` and `robots.txt` for search engines
+- [ ] Optional: replace `public/og.png` with your own image later (1200 x 630)
+
 **Phase 8, content and launch:**
 - [ ] Bulk add real content
 - [ ] About page
