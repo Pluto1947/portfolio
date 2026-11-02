@@ -25,7 +25,7 @@ Four top-level domains. Security is Dan's specialism and the connective thread; 
 - `cloud`
 - `web`
 
-Accent assignment: teal/violet/coral map to three of these; the fourth uses a tinted variant (a Phase 6 visual decision — don't hard-code hex before then). Domains are **not** enumerated in the validator schema on purpose: a new domain is a new folder under `content/`, zero code change (see Architecture).
+Accent assignment (confirmed in Phase 6): security teal `#2DD4BF`, machine-learning violet `#A78BFA`, cloud coral `#FB923C`, web **Sky** `#6AAFDC` (an even mix of teal and violet, so it stays in the same family). Defined once as CSS variables in `src/styles/global.css`. Domains are **not** enumerated in the validator schema on purpose: a new domain is a new folder under `content/`, zero code change (see Architecture).
 
 ## Confirmed design decisions
 
@@ -139,6 +139,7 @@ Every write-up body follows this structure (enforced by convention, not code):
 - **Graph edges** — two distinct kinds, must remain visually distinguishable (color/thickness/dash):
   - *Biographical arcs*: chronological path between locations, ordered by each location's `since` in `_locations.json`.
   - *Thematic arcs*: one arc per pair of locations whose items share a domain or link to each other (`related:` or `[[slug]]`). Links weigh more than a shared domain, and weight sets arc thickness.
+  - Styling (confirmed in Phase 6): journey arcs are coral, dashed and animated; connected work is a low solid violet line. Where connected work joins the same two places as a journey arc, it bows out to one side ("side by side"), so the two never overlap from any angle. Connected work uses globe.gl's paths layer for this, since its arcs layer can't bend sideways.
 - **Globe pins**: one per location with coordinates, sized by content count at that location (a location with no content yet shows a dim pin). Nearby locations merge into a numbered cluster that splits as you zoom; clicking a cluster zooms in, clicking a pin lists its items. globe.gl has no built in clustering, so this is done in `src/components/Globe.astro`.
 - **Accessibility/SEO fallback**: every domain and content page must be reachable via plain HTML navigation independent of the WebGL globe. Built in Phase 2 as `/sitemap` (linked from the footer on every page) plus a domain list on the placeholder home page. The globe is the flagship experience, not the only entry point.
 - **Performance**: the globe should lazy-load after core page content renders, not block first paint.

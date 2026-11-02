@@ -59,8 +59,8 @@ Each of these is a content edit. None needs code.
 - [x] Starfield background: depth layers plus a shooting star every 1 to 3 minutes (version D)
 - [x] Dot dome behind domain page headers, not on the globe page
 - [x] Dome also behind the Contact and About headers (not write-ups)
-- [ ] Accent colour for the `web` domain (currently a placeholder tint)
-- [ ] Arc styling: journey and connected work arcs overlap when they join the same two places
+- [x] Accent colour for the `web` domain: Sky `#6AAFDC`, a teal and violet mix
+- [x] Arc styling: connected work bows out to one side when it joins the same two places as a journey arc
 
 **Phase 7, performance and accessibility:**
 - [ ] Shrink the globe bundle. It is about 2 MB before compression and causes the "chunks larger than 500 kB" build warning.

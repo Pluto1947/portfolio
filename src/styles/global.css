@@ -9,7 +9,7 @@
   --teal:   #2DD4BF;               /* accent / security */
   --violet: #A78BFA;               /* accent / machine-learning */
   --coral:  #FB923C;               /* accent / cloud */
-  --web:    #9DA9E0;               /* placeholder tint for web until Phase 6 */
+  --web:    #6AAFDC;               /* accent / web: Sky, a teal and violet mix (Phase 6) */
 }
 
 * { box-sizing: border-box; }
