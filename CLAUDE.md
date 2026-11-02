@@ -97,4 +97,5 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 - Locations are mock: `placeholder-a/b/c` in `_locations.json`, with the example note and theory moved onto two of them. Swap in Dan's real places and `since` dates when he sends them; no code change needed.
 - Phase 7 work is built: smaller globe bundle (stubs), WebP texture, self hosted fonts, lite mode, starfield optimisation, skip link, headings, descriptions. Awaiting Dan's sign off; the real low end phone test is Dan's to do.
 - After Phase 7: launch polish (link previews, icon, 404, sitemap) and the home intro (option C) are built. Dan's name is Adewuyi Samuel Dan (in `content/_site.json`); his one line intro is still a placeholder.
+- Item 11 done: everything Dan edits lives in `content/` (`_domains.json`, `_site.json` with links and CV, `_pages/about.md`, `_files/`). `CONTENT.md` is his editing guide. Keep it that way: never put editable text in `src/`.
 - Run `npm install` first in a fresh environment.

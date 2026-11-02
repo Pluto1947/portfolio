@@ -1,5 +1,7 @@
 # Checklist
 
+See `CONTENT.md` for how to edit each content file.
+
 Things left for later and tests still to run. Tick them off as you go. Last updated during Phase 6.
 
 ## **Your content to supply**
@@ -14,10 +16,11 @@ Each of these is a content edit. None needs code.
   - Write the real one line descriptions.
   - Decide whether "Free pentest" keeps its `"badge": "free"`.
   - Add or remove services as you like.
-- [ ] **Contact intro line:** send the wording. It currently sits in `src/pages/contact.astro`.
+- [ ] **Contact intro line:** `contactIntro` in `content/_site.json`.
 - [ ] **Home page line:** replace the placeholder `tagline` in `content/_site.json` (your name is already set there).
 - [ ] **Terminal `whoami` text:** edit `content/_terminal.json`. Add any extra fun commands there too, as `"name": "what it prints"`.
-- [ ] **About page:** currently a stub. Planned for Phase 8.
+- [ ] **About page:** write `content/_pages/about.md`.
+- [ ] **Links and CV:** fill `links` in `content/_site.json`, put `cv.pdf` in `content/_files/` and set `"cv": "cv.pdf"`.
 - [ ] **Recordings for real write-ups:** record with asciinema and add them under Evidence.
   - Start with `network-attacks-mininet`.
   - Recording from a VM: run `asciinema rec content/<domain>/<slug>/name.cast` on your own machine, then `ssh` into the VM.

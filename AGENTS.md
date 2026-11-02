@@ -25,7 +25,7 @@ Four top-level domains. Security is Dan's specialism and the connective thread; 
 - `cloud`
 - `web`
 
-Accent assignment (confirmed in Phase 6): security teal `#2DD4BF`, machine-learning violet `#A78BFA`, cloud coral `#FB923C`, web **Sky** `#6AAFDC` (an even mix of teal and violet, so it stays in the same family). Defined once as CSS variables in `src/styles/global.css`. Domains are **not** enumerated in the validator schema on purpose: a new domain is a new folder under `content/`, zero code change (see Architecture).
+Accent assignment (confirmed in Phase 6): security teal `#2DD4BF`, machine-learning violet `#A78BFA`, cloud coral `#FB923C`, web **Sky** `#6AAFDC` (an even mix of teal and violet, so it stays in the same family). Domain names and colours live in `content/_domains.json` (nav order); the nav, pages, home key and globe all read it, so a new domain is a new folder plus one line there. Domains are **not** enumerated in the validator schema on purpose: a new domain is a new folder under `content/`, zero code change (see Architecture).
 
 ## Confirmed design decisions
 
@@ -116,7 +116,15 @@ summary: "one line, used as card preview text"
 
 `_services.json` lists the topic cards on the Contact page, in display order: `{ title, description, badge?, icon?, accent? }`. `icon` is one of `shield`, `code`, `chat`, `cloud`, `brain`, `star`; `accent` is one of `teal`, `violet`, `coral`, `web`. The chosen card's `title` arrives as the `topic` field of the message. Editing services is a content change, no code. The build validates this file too.
 
-`_site.json` holds `{ name, tagline }`: the name shown on the home page and in link previews, and the one line intro. Validated at build.
+`_site.json` holds `{ name, tagline, contactIntro, links: { github, linkedin, email }, cv }`. Empty links are hidden; `cv` is a file name in `content/_files/`. Links show in the footer, on About and as terminal commands. Validated at build.
+
+`_domains.json` maps each domain slug to `{ label, accent }` (accent as `#RRGGBB`).
+
+`_pages/<name>.md` holds standalone markdown pages (`title`, `description`); the About page is `_pages/about.md`. These render as plain prose, not the write-up outline.
+
+`_files/` holds downloadable files, published at `/files/<name>`.
+
+**Rule:** anything Dan edits over time lives in `content/`, never in `src/`. `CONTENT.md` is the editing guide.
 
 `_template.md` is the copy-paste starting point for new content. Keep its body sections aligned to the write-up structure below. If the schema changes, update `_template.md` in the same commit.
 
