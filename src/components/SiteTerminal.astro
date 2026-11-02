@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import terminal from '../../content/_terminal.json';
 import { getDomains, getItems } from '../lib/graph';
+import { siteLinks } from '../lib/links';
 
 const items = await getItems();
 const domains = await getDomains();
@@ -18,6 +19,7 @@ const castFor = (domain: string, slug: string) => {
 };
 const data = {
   whoami: terminal.whoami,
+  links: siteLinks().map((l) => ({ cmd: l.key, label: l.label, href: l.href, external: l.external })),
   extra: (terminal as { commands?: Record<string, string> }).commands ?? {},
   domains: domains.map((d) => ({
     slug: d,
@@ -91,7 +93,8 @@ const data = {
 
 <script>
   type It = { slug: string; title: string; type: string; url: string; cast: string | null };
-  type Data = { whoami: string; extra: Record<string, string>; domains: { slug: string; items: It[] }[] };
+  type Link = { cmd: string; label: string; href: string; external: boolean };
+  type Data = { whoami: string; extra: Record<string, string>; links: Link[]; domains: { slug: string; items: It[] }[] };
 
   const raw = document.getElementById('st-data')?.textContent;
   const fab = document.getElementById('st-fab') as HTMLButtonElement | null;
@@ -140,7 +143,7 @@ const data = {
         e.preventDefault();
         const hasArg = /\s/.test(input.value.trimStart());
         const [c = '', a = ''] = input.value.trimStart().split(/\s+/);
-        const pool = !hasArg ? ['help', 'whoami', 'ls', 'cd', 'open', 'play', 'contact', 'home', 'clear', ...Object.keys(data.extra)]
+        const pool = !hasArg ? ['help', 'whoami', 'ls', 'cd', 'open', 'play', 'contact', 'home', 'clear', ...data.links.map((l) => l.cmd), ...Object.keys(data.extra)]
           : c === 'cd' ? data.domains.map((d) => d.slug)
           : c === 'play' ? unique.filter((i) => i.cast).map((i) => i.slug)
           : c === 'open' ? [...data.domains.map((d) => d.slug), ...unique.map((i) => i.slug)]
@@ -197,6 +200,7 @@ const data = {
             '  contact           go to the contact page',
             '  home              go to the globe',
             '  clear             clear the screen',
+            ...data.links.map((l) => `  ${l.cmd.padEnd(18)}open my ${esc(l.label)}`),
             ...Object.keys(data.extra).map((k) => `  ${esc(k)}`),
             '<span class="d">tab completes, arrow up recalls history, ` toggles this terminal</span>',
           ].join('\n'));
@@ -230,9 +234,16 @@ const data = {
         case 'contact': go('/contact'); break;
         case 'home': go('/'); break;
         case 'clear': scr.innerHTML = ''; break;
-        default:
+        default: {
+          const link = data.links.find((l) => l.cmd === c);
+          if (link) {
+            out(`<span class="d">opening</span> <a href="${esc(link.href)}"${link.external ? ' target="_blank" rel="noopener"' : ''}>${esc(link.label)}</a>`);
+            if (link.external) window.open(link.href, '_blank', 'noopener'); else window.location.href = link.href;
+            break;
+          }
           if (Object.prototype.hasOwnProperty.call(data.extra, c)) out(esc(data.extra[c]));
           else out(`<span class="w">command not found: ${esc(c)}</span>  <span class="d">type help</span>`);
+        }
       }
       newLine();
       input.focus({ preventScroll: true });

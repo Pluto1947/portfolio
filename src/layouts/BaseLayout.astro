@@ -4,6 +4,7 @@ import SiteUX from '../components/SiteUX.astro';
 import SiteTerminal from '../components/SiteTerminal.astro';
 import Starfield from '../components/Starfield.astro';
 import site from '../../content/_site.json';
+import { siteLinks } from '../lib/links';
 // Fonts are served from the site itself (same Google Fonts files, latin set),
 // so no third party request blocks the first paint.
 import '@fontsource/inter/latin-400.css';
@@ -19,6 +20,7 @@ const {
   noindex = false,
   description = 'Projects, write ups and notes across security, machine learning, cloud and web, mapped on an interactive globe.',
 } = Astro.props;
+const links = siteLinks();
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImage = new URL('/og.png', Astro.site).href;
 ---
@@ -54,7 +56,12 @@ const ogImage = new URL('/og.png', Astro.site).href;
       <Nav />
       <main id="main" tabindex="-1">
         <slot />
-        <footer class="sitefoot"><a href="/sitemap">All pages</a></footer>
+        <footer class="sitefoot">
+          {links.map((l) => (
+            <><a href={l.href} {...(l.external ? { target: '_blank', rel: 'noopener' } : {})} {...(l.key === 'cv' ? { download: '' } : {})}>{l.label}</a><span class="sep" aria-hidden="true">·</span></>
+          ))}
+          <a href="/sitemap">All pages</a>
+        </footer>
       </main>
     </div>
     <SiteUX />

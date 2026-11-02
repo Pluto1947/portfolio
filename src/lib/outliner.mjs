@@ -27,7 +27,9 @@ function isBlank(node) {
 }
 
 export function rehypeOutliner() {
-  return (tree) => {
+  return (tree, file) => {
+    // standalone pages (content/_pages, e.g. About) stay plain prose, not an outline
+    if (String(file?.path || file?.history?.[0] || '').includes('/_pages/')) return;
     // 1. group top-level h2 sections into <details class="onode l1">
     const grouped = [];
     let current = null;

@@ -38,6 +38,7 @@ main:focus { outline: none; }
 main { min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
 .sitefoot { margin-top: auto; padding: 0 clamp(18px, 4vw, 52px) 32px; text-align: center; font-size: 12px; }
 .sitefoot a { color: var(--muted); text-decoration: none; }
+.sitefoot .sep { color: var(--muted); opacity: 0.5; margin: 0 10px; }
 .sitefoot a:hover { color: var(--text); }
 
 @media (max-width: 620px) {

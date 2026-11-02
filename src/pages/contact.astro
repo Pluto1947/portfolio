@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Title from '../components/Title.astro';
 import Dome from '../components/Dome.astro';
 import services from '../../content/_services.json';
+import site from '../../content/_site.json';
 
 // Contact page (layout B): service cards on the left choose the topic, the form
 // sits on the right. It is one Netlify form, so it works with JavaScript off:
@@ -31,7 +32,7 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
     <header class="dhead">
       <Dome />
       <Title text="Contact" />
-      <p class="lead">PLACEHOLDER: an intro line in your own words.</p>
+      <p class="lead">{site.contactIntro}</p>
     </header>
 
     <form

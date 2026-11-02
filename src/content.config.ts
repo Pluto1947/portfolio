@@ -1,9 +1,11 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import fs from 'node:fs';
 import locations from '../content/_locations.json';
 import services from '../content/_services.json';
 import terminal from '../content/_terminal.json';
 import site from '../content/_site.json';
+import domainsFile from '../content/_domains.json';
 
 // This schema IS the frontmatter validator. `astro build` (and CI) parse every
 // content file against it and fail on missing/malformed fields — see AGENTS.md
@@ -48,10 +50,34 @@ if (!parsedTerminal.success) {
 }
 
 // _site.json holds the name and one line intro shown on the home page.
-const siteSchema = z.object({ name: z.string().min(1), tagline: z.string().min(1) });
+const siteSchema = z.object({
+  name: z.string().min(1),
+  tagline: z.string().min(1),
+  contactIntro: z.string().min(1),
+  links: z.object({
+    github: z.union([z.literal(''), z.string().url()]).default(''),
+    linkedin: z.union([z.literal(''), z.string().url()]).default(''),
+    email: z.union([z.literal(''), z.string().email()]).default(''),
+  }).default({ github: '', linkedin: '', email: '' }),
+  // a file name in content/_files, published at /files/<name>; empty hides the CV link
+  cv: z.string().default(''),
+});
 const parsedSite = siteSchema.safeParse(site);
 if (!parsedSite.success) {
   throw new Error(`content/_site.json is invalid: ${parsedSite.error.message}`);
+}
+
+// _domains.json: each domain's display name and accent colour, in nav order.
+const domainSchema = z.record(
+  z.string().regex(/^[a-z0-9-]+$/, 'domain slugs are lowercase letters, digits and hyphens (the folder name)'),
+  z.object({ label: z.string().min(1), accent: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'accent must be a colour like #2DD4BF') }),
+);
+const parsedDomains = domainSchema.safeParse(domainsFile);
+if (!parsedDomains.success) {
+  throw new Error(`content/_domains.json is invalid: ${parsedDomains.error.message}`);
+}
+if (site.cv && !fs.existsSync(new URL(`../content/_files/${site.cv}`, import.meta.url))) {
+  throw new Error(`content/_site.json: cv "${site.cv}" was not found in content/_files/`);
 }
 
 const locationSlugs = Object.keys(locations);
@@ -77,4 +103,10 @@ const content = defineCollection({
   }),
 });
 
-export const collections = { content };
+// Standalone pages written in markdown (for now the About page): content/_pages/<name>.md
+const pages = defineCollection({
+  loader: glob({ pattern: '*.md', base: './content/_pages' }),
+  schema: z.object({ title: z.string().min(1), description: z.string().min(1) }),
+});
+
+export const collections = { content, pages };
