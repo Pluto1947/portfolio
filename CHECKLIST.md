@@ -20,6 +20,7 @@ Each of these is a content edit. None needs code.
 - [ ] **Home page line:** replace the placeholder `tagline` in `content/_site.json` (your name is already set there).
 - [ ] **Terminal `whoami` text:** edit `content/_terminal.json`. Add any extra fun commands there too, as `"name": "what it prints"`.
 - [ ] **About page:** write `content/_pages/about.md`.
+- [ ] **Photo:** put it in `content/_files/` and set `"photo"` in `content/_site.json` (style A frame, already built).
 - [ ] **Links and CV:** fill `links` in `content/_site.json`, put `cv.pdf` in `content/_files/` and set `"cv": "cv.pdf"`.
 - [ ] **Recordings for real write-ups:** record with asciinema and add them under Evidence.
   - Start with `network-attacks-mininet`.
@@ -80,7 +81,7 @@ Each of these is a content edit. None needs code.
 - [x] Site icon: "D." with the teal dot (`favicon.ico`, `apple-touch-icon.png`)
 - [x] Custom 404 page
 - [x] `sitemap-index.xml` and `robots.txt` for search engines
-- [ ] Optional: replace `public/og.png` with your own image later (1200 x 630)
+- [x] Link preview image is now generated from your photo, name and domains
 
 **Phase 8, content and launch:**
 - [ ] Bulk add real content

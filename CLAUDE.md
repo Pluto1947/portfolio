@@ -101,4 +101,5 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 - Phase 7 work is built: smaller globe bundle (stubs), WebP texture, self hosted fonts, lite mode, starfield optimisation, skip link, headings, descriptions. Signed off by Dan; the real low end phone test is still Dan's to do.
 - After Phase 7: launch polish (link previews, icon, 404, sitemap) and the home intro (option C) are built. Dan's name is Adewuyi Samuel Dan (in `content/_site.json`); his one line intro is still a placeholder.
 - Item 11 done: everything Dan edits lives in `content/` (`_domains.json`, `_site.json` with links and CV, `_pages/about.md`, `_files/`). `CONTENT.md` is his editing guide. Keep it that way: never put editable text in `src/`.
+- Photo: style A (round, teal ring) picked by Dan and built; shows in the home intro, on About and on the generated link preview once `photo` is set in `_site.json`. Dan will send the photo later.
 - Run `npm install` first in a fresh environment.

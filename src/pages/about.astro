@@ -3,6 +3,7 @@ import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Title from '../components/Title.astro';
 import Dome from '../components/Dome.astro';
+import Photo from '../components/Photo.astro';
 import site from '../../content/_site.json';
 import { siteLinks } from '../lib/links';
 
@@ -18,7 +19,10 @@ const links = siteLinks();
     <a class="back" href="/">‹ Home</a>
     <header class="dhead">
       <Dome />
-      <Title text={entry.data.title} />
+      <div class="ahead">
+        <Photo size={140} class="aphoto" eager />
+        <Title text={entry.data.title} />
+      </div>
     </header>
     <div class="cols">
       <article class="prose"><Content /></article>
@@ -38,6 +42,8 @@ const links = siteLinks();
 </BaseLayout>
 
 <style>
+  .ahead { display: flex; align-items: center; gap: clamp(16px, 3vw, 28px); flex-wrap: wrap; }
+  @media (max-width: 620px) { .ahead :global(.aphoto) { width: 104px; height: 104px; } }
   .prose { max-width: 68ch; font-size: 15.5px; line-height: 1.7; color: #dcdaee; }
   .prose :global(p) { margin: 0 0 14px; }
   .prose :global(strong) { color: var(--text); font-family: "Space Grotesk", sans-serif; font-weight: 600; }

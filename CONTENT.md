@@ -18,7 +18,7 @@ mistake can't reach the live site.
 
 | File | What it controls |
 |---|---|
-| `content/_site.json` | Your name and home page line, the Contact page intro, your GitHub, LinkedIn and email, and your CV |
+| `content/_site.json` | Your name and home page line, the Contact page intro, your GitHub, LinkedIn and email, your CV and your photo |
 | `content/_domains.json` | Each domain's name and colour, in nav order |
 | `content/_locations.json` | Places on the globe, with `since` dates for the journey arcs |
 | `content/_services.json` | The service cards on the Contact page |
@@ -33,7 +33,8 @@ mistake can't reach the live site.
 - **Add a domain:** add a line to `_domains.json` (name and a colour like `#F472B6`), then create `content/<domain>/` with an item in it. The nav, page, home key and globe pick it up.
 - **Empty domains are hidden:** a domain with no items yet doesn't appear anywhere. It shows up on its own as soon as its first item is added.
 - **Add a place:** add it to `_locations.json` with `lat`, `lng`, `label` and optionally `since`. Use its key as `location:` in an item.
-- **Change the link preview image:** replace `public/og.png` (1200 x 630).
+- **Add your photo:** put it in `content/_files/` (for example `photo.jpg`) and set `"photo": "photo.jpg"` in `_site.json`. It appears in the home intro, on About, and on the link preview card, resized automatically. Best: head and shoulders, plain or dark background, at least 800 x 800.
+- **Link preview image:** built automatically from your photo, name and domains every time the site builds. Nothing to edit.
 
 ## **Placeholders**
 

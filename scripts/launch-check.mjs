@@ -42,6 +42,7 @@ for (const d of domains) if (!used.has(d)) todo.push(`domain "${d}" has no items
 const site = json('_site.json');
 for (const [k, v] of Object.entries(site.links ?? {})) if (!v) todo.push(`no ${k} link in content/_site.json`);
 if (!site.cv) todo.push('no CV in content/_site.json (put cv.pdf in content/_files/)');
+if (!site.photo) todo.push('no photo in content/_site.json (put it in content/_files/)');
 
 // 5. places without journey dates
 const dated = Object.values(locations).filter((l) => l.since).length;

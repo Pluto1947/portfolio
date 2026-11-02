@@ -24,6 +24,7 @@
     "asciinema-player": "3.17.0",
     "astro": "^7.3.2",
     "globe.gl": "2.46.2",
+    "opentype.js": "2.0.0",
     "unist-util-visit": "^5.1.0"
   },
   "allowScripts": {

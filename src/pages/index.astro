@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Globe from '../components/Globe.astro';
+import Photo from '../components/Photo.astro';
 import site from '../../content/_site.json';
 import { getDomains, itemsInDomain, accentFor, labelFor } from '../lib/graph';
 
@@ -17,9 +18,12 @@ const domains = await Promise.all(
 <BaseLayout title={`${site.name} · Portfolio`}>
   <section class="hero" id="hero">
     <div class="intro" id="intro" data-avoid>
-      <h1 class="name">{site.name}</h1>
-      <p class="line">{site.tagline}</p>
-      <p class="hint"><span class="mouse">Drag the globe, click a pin, or press <kbd>`</kbd> for the terminal</span><span class="touch">Drag the globe, tap a pin, or open the terminal</span></p>
+      <Photo size={96} class="ip" eager />
+      <div class="it">
+        <h1 class="name">{site.name}</h1>
+        <p class="line">{site.tagline}</p>
+        <p class="hint"><span class="mouse">Drag the globe, click a pin, or press <kbd>`</kbd> for the terminal</span><span class="touch">Drag the globe, tap a pin, or open the terminal</span></p>
+      </div>
     </div>
     <Globe />
 
@@ -53,6 +57,7 @@ const domains = await Promise.all(
     position: absolute; z-index: 4; pointer-events: none;
     left: 50%; top: calc(50% - 40px); transform: translate(-50%, -50%);
     width: min(90%, 760px); text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
     transition: left .9s cubic-bezier(.2,.7,.2,1), top .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1), width .9s, opacity .6s;
   }
   .intro .name {
@@ -68,14 +73,20 @@ const domains = await Promise.all(
   .hero.intro-on :global(.globe) { filter: brightness(0.38); transition: filter .9s; }
   .hero :global(.globe) { transition: filter .9s; }
 
-  .intro.settled { left: clamp(16px, 3vw, 40px); top: clamp(16px, 4vh, 40px); transform: none; width: min(34%, 440px); text-align: left; }
+  /* photo: above the name during the intro, beside it once settled */
+  .intro :global(.ip) { width: 96px; height: 96px; transition: width .9s cubic-bezier(.2,.7,.2,1), height .9s cubic-bezier(.2,.7,.2,1); }
+  .intro .it { min-width: 0; }
+  .intro.settled { left: clamp(16px, 3vw, 40px); top: clamp(16px, 4vh, 40px); transform: none; width: min(40%, 520px); text-align: left;
+    flex-direction: row; align-items: center; gap: 14px; }
+  .intro.settled :global(.ip) { width: 64px; height: 64px; }
   .intro.settled .name { font-size: clamp(22px, 2.4vw, 32px); }
   .intro.settled .line { font-size: 14px; }
   .intro.settled .hint { opacity: 1; }
 
   /* phones: no spare corner, so the intro sits above the globe in the page flow */
   @media (max-width: 620px) {
-    .intro, .intro.settled { position: static; transform: none; width: auto; text-align: left; padding: 20px 16px 0; align-self: stretch; }
+    .intro, .intro.settled { position: static; transform: none; width: auto; text-align: left; padding: 20px 16px 0; align-self: stretch; flex-direction: row; align-items: center; gap: 12px; }
+    .intro :global(.ip), .intro.settled :global(.ip) { width: 56px; height: 56px; }
     .intro .name, .intro.settled .name { font-size: 28px; }
     .intro .line { font-size: 14px; }
     .intro .hint { opacity: 1; }

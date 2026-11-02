@@ -61,6 +61,8 @@ const siteSchema = z.object({
   }).default({ github: '', linkedin: '', email: '' }),
   // a file name in content/_files, published at /files/<name>; empty hides the CV link
   cv: z.string().default(''),
+  // an image in content/_files (jpg, png or webp); empty hides the photo everywhere
+  photo: z.string().regex(/^$|\.(jpe?g|png|webp)$/i, 'photo must be a .jpg, .png or .webp file name').default(''),
 });
 const parsedSite = siteSchema.safeParse(site);
 if (!parsedSite.success) {
@@ -75,6 +77,10 @@ const domainSchema = z.record(
 const parsedDomains = domainSchema.safeParse(domainsFile);
 if (!parsedDomains.success) {
   throw new Error(`content/_domains.json is invalid: ${parsedDomains.error.message}`);
+}
+const sitePhoto = (site as { photo?: string }).photo;
+if (sitePhoto && !fs.existsSync(new URL(`../content/_files/${sitePhoto}`, import.meta.url))) {
+  throw new Error(`content/_site.json: photo "${sitePhoto}" was not found in content/_files/`);
 }
 if (site.cv && !fs.existsSync(new URL(`../content/_files/${site.cv}`, import.meta.url))) {
   throw new Error(`content/_site.json: cv "${site.cv}" was not found in content/_files/`);
