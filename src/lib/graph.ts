@@ -72,13 +72,21 @@ export async function getItems(): Promise<Item[]> {
   return cache;
 }
 
-// Confirmed domains always get a page, even before they have content.
-// Any other domain found in content still gets one with no code change.
+// Only domains with at least one item are shown anywhere (pages, nav, home key,
+// sitemap, terminal). An empty domain appears automatically once it has content.
 export async function getDomains(): Promise<string[]> {
   const items = await getItems();
-  const set = new Set<string>(Object.keys(DOMAINS));
+  const set = new Set<string>();
   for (const it of items) for (const d of it.domains) set.add(d);
   return [...set].sort();
+}
+
+/** Domains with content, in the order listed in _domains.json (for the nav). */
+export async function navDomains() {
+  const live = new Set(await getDomains());
+  const listed = domainList().filter((d) => live.has(d.slug));
+  const extra = [...live].filter((d) => !DOMAINS[d]).map((slug) => ({ slug, label: labelFor(slug), accent: accentFor(slug) }));
+  return [...listed, ...extra];
 }
 
 const byDate = (a: Item, b: Item) => +new Date(b.data.date) - +new Date(a.data.date);

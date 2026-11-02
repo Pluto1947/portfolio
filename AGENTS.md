@@ -140,7 +140,7 @@ Every write-up body follows this structure (enforced by convention, not code):
 
 ## Architecture
 
-- **Domain pages**: auto-generated, one per domain. The four confirmed domains always get a page (an empty one says "coming soon"), and any other domain named in an item's `domains:` gets one too, so a new domain still needs zero code changes. An item's URL comes from its folder: `/<folder>/<slug>`. **Layout (confirmed):** items **grouped by `type`** under Project / Writeup / Note / Theory headings (not a card grid or table), plus a **Connections rail** (see Linked references).
+- **Domain pages**: auto-generated, one per domain. **Only domains with at least one item are shown** (Dan's call in Phase 8): an empty domain has no page and is left out of the nav, home key, sitemap and terminal until its first item lands, then appears automatically. Any domain named in an item's `domains:` gets a page, so a new domain still needs zero code changes. An item's URL comes from its folder: `/<folder>/<slug>`. **Layout (confirmed):** items **grouped by `type`** under Project / Writeup / Note / Theory headings (not a card grid or table), plus a **Connections rail** (see Linked references).
 - **Linked references (wiki panel), confirmed**: the site reads as a wiki — every domain and content page surfaces its graph connections as plain-HTML links (the non-globe version of the Phase 3 graph). Three panels, all build-time computed by indexing every item's `domains`, `related:`, and inline `[[slug]]` links:
   - *Backlinks ("Linked from")*: every page that links to this one (via `related:` or `[[slug]]`).
   - *Connected domains*: other domains this page's items also belong to (cross-domain items are the generalist thread).

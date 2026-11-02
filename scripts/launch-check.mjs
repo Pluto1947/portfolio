@@ -36,7 +36,7 @@ for (const file of walk(root)) {
   const m = fs.readFileSync(file, 'utf8').match(/^domains:\s*\[([^\]]*)\]/m);
   if (m) m[1].split(',').map((x) => x.trim()).filter(Boolean).forEach((x) => used.add(x));
 }
-for (const d of domains) if (!used.has(d)) todo.push(`domain "${d}" has no items yet (shows "coming soon")`);
+for (const d of domains) if (!used.has(d)) todo.push(`domain "${d}" has no items yet (hidden from the site until it does)`);
 
 // 4. links and CV
 const site = json('_site.json');

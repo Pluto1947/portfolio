@@ -5,11 +5,12 @@
 // Works fully with no JS; Anime.js entrance + the constellation lines are
 // progressive enhancement only.
 export interface DomainLink { slug: string; label: string; accent: string; }
-import { domainList } from '../lib/graph';
+import { navDomains } from '../lib/graph';
 interface Props { domains?: DomainLink[]; }
 
-// Domains come from content/_domains.json, in the order listed there.
-const { domains = domainList() }: Props = Astro.props;
+// Domains come from content/_domains.json, in the order listed there. Domains
+// with no content yet are left out until they have something to show.
+const { domains = await navDomains() }: Props = Astro.props;
 
 // Fan offsets for the nested sub-arc: domains sit on a gentle curve, about 25px
 // apart. With four domains this matches the original hand placed positions.

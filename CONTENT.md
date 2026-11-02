@@ -31,6 +31,7 @@ mistake can't reach the live site.
 - **Add your CV:** put `cv.pdf` in `content/_files/` and set `"cv": "cv.pdf"` in `_site.json`. It appears in the footer, on About, and as the terminal command `cv`.
 - **Add your links:** fill `github`, `linkedin` and `email` in `_site.json`. Empty ones stay hidden.
 - **Add a domain:** add a line to `_domains.json` (name and a colour like `#F472B6`), then create `content/<domain>/` with an item in it. The nav, page, home key and globe pick it up.
+- **Empty domains are hidden:** a domain with no items yet doesn't appear anywhere. It shows up on its own as soon as its first item is added.
 - **Add a place:** add it to `_locations.json` with `lat`, `lng`, `label` and optionally `since`. Use its key as `location:` in an item.
 - **Change the link preview image:** replace `public/og.png` (1200 x 630).
 
