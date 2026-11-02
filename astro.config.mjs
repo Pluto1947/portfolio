@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 import { unified } from '@astrojs/markdown-remark';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -53,7 +54,13 @@ const globeStubs = [
 ];
 
 export default defineConfig({
-  integrations: [mdx()],
+  // Production address: used for the sitemap, canonical links and link previews.
+  site: 'https://adeniyihub.netlify.app',
+  integrations: [
+    mdx(),
+    // sitemap-index.xml for search engines; the post submit thank you page is left out
+    sitemap({ filter: (page) => !page.includes('/contact/thanks') }),
+  ],
   vite: {
     resolve: { alias: globeStubs },
     // The only chunk over Vite's 500 kB default is the globe (three.js), which
