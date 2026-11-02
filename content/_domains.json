@@ -1,0 +1,6 @@
+{
+  "security": { "label": "Security", "accent": "#2DD4BF" },
+  "machine-learning": { "label": "Machine Learning", "accent": "#A78BFA" },
+  "cloud": { "label": "Cloud", "accent": "#FB923C" },
+  "web": { "label": "Web", "accent": "#6AAFDC" }
+}

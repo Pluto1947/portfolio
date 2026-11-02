@@ -1,4 +1,11 @@
 {
   "name": "Adewuyi Samuel Dan",
-  "tagline": "PLACEHOLDER: one line about what you do"
+  "tagline": "PLACEHOLDER: one line about what you do",
+  "contactIntro": "PLACEHOLDER: an intro line in your own words.",
+  "links": {
+    "github": "",
+    "linkedin": "",
+    "email": ""
+  },
+  "cv": ""
 }
