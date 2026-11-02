@@ -89,7 +89,7 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 - Phases 0 to 3 are done. Phase 4 (contact form) is built on the branch: layout B (service cards plus form), picked by Dan. The real submission test is deferred by Dan: it needs form detection turned on in Netlify and one deploy to `main` (only when Dan says "deploy"). Dan asked to continue to Phase 5 meanwhile.
 - Phase 5 in progress. Done: evidence figures in write-ups (figure card frame, recordings play on click, screenshots open full size), with placeholder media in the example write-up. Also done: the site terminal, placement C (corner button or backtick on every page). Phase 5 is signed off by Dan. `whoami` text in `content/_terminal.json` is a placeholder for Dan.
 - Services and the Contact intro line are placeholders. Dan will update `content/_services.json` and the intro later.
-- Deferred to Phase 6: a constellation or starfield background, designed together with the dome motif. Dan likes the idea.
+- Phase 6 progress: starfield (version D, depth layers plus a shooting star every 1 to 3 minutes) and the dome behind domain page headers are built, picked by Dan. Left: web accent colour, arc styling, and whether the dome goes behind other headers.
 - Phases 0, 1 and 2 are done. Phase 2 was signed off by Dan after review fixes: coming soon pages for empty domains, About and Contact stubs, a `/sitemap` page with a footer link, and phone title wrapping.
 - The domain list on the placeholder home page stays for now as a colour key. Revisit it with the hero layout in Phase 3; the nav already covers plain link navigation.
 - Already built ahead of schedule: tag filtering, hover previews, foldable groups and quick search. These were Dan's requests, so keep them.

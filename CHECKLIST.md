@@ -1,6 +1,6 @@
 # Checklist
 
-Things left for later and tests still to run. Tick them off as you go. Last updated at the start of Phase 6.
+Things left for later and tests still to run. Tick them off as you go. Last updated during Phase 6.
 
 ## **Your content to supply**
 
@@ -56,8 +56,9 @@ Each of these is a content edit. None needs code.
 ## **Saved for later phases**
 
 **Phase 6, visual theming (now):**
-- [ ] Constellation or starfield background, designed together with the dot dome
-- [ ] Dot dome behind domain page headers (the quieter echo of the motif)
+- [x] Starfield background: depth layers plus a shooting star every 1 to 3 minutes (version D)
+- [x] Dot dome behind domain page headers, not on the globe page
+- [ ] Decide whether the dome also goes behind other page headers (write-ups, Contact, About)
 - [ ] Accent colour for the `web` domain (currently a placeholder tint)
 - [ ] Arc styling: journey and connected work arcs overlap when they join the same two places
 

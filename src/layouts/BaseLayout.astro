@@ -2,6 +2,7 @@
 import Nav from '../components/Nav.astro';
 import SiteUX from '../components/SiteUX.astro';
 import SiteTerminal from '../components/SiteTerminal.astro';
+import Starfield from '../components/Starfield.astro';
 import '../styles/global.css';
 
 interface Props { title?: string; }
@@ -25,6 +26,7 @@ const { title = 'Dan' } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
+    <Starfield />
     <div class="stage">
       <Nav />
       <main>

@@ -1,0 +1,60 @@
+---
+// Dot halftone dome behind a page header (Phase 6). Drawn once on a canvas:
+// faint rings above a horizon, a dome of dots that fade toward the top and
+// edges, then a flat scrim so the header text stays crisp. Never used on the
+// home page, where the globe stands alone. Rings take the page accent colour.
+---
+
+<canvas class="dome" aria-hidden="true"></canvas>
+
+<style>
+  .dome { position: absolute; z-index: -1; pointer-events: none; display: block;
+    top: -40px; right: -4%; width: min(720px, 80%); height: 300px; }
+  @media (max-width: 620px) { .dome { width: 100%; right: 0; height: 220px; } }
+</style>
+
+<script>
+  function paint(cv: HTMLCanvasElement) {
+    const ctx = cv.getContext('2d');
+    if (!ctx) return;
+    const r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = r.width, H = r.height;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    // resolve the page accent (a CSS variable) to a real colour
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--accent, var(--teal))'; cv.parentElement!.append(probe);
+    const accent = getComputedStyle(probe).color; probe.remove();
+    const rgb = (accent.match(/\d+/g) || ['45', '212', '191']).slice(0, 3).join(',');
+
+    const cx = W * 0.55, cy = H * 0.78, R = Math.min(W * 0.48, H * 1.2);
+    for (const k of [0.62, 0.82, 1.02]) {
+      ctx.strokeStyle = `rgba(${rgb},0.08)`; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, R * k, Math.PI, 0); ctx.stroke();
+    }
+    const step = 7;
+    for (let y = cy - R * 0.6; y < cy + 6; y += step) {
+      for (let x = cx - R; x < cx + R; x += step) {
+        const dx = (x - cx) / R, dy = (cy - y) / (R * 0.6), d = dx * dx + dy * dy;
+        if (d > 1) continue;
+        const v = (1 - d) * (0.35 + 0.65 * (1 - dy));
+        ctx.fillStyle = `rgba(120,128,190,${0.1 + v * 0.22})`;
+        ctx.beginPath(); ctx.arc(x, y, Math.max(0.4, v * 2.4), 0, 7); ctx.fill();
+      }
+    }
+    const line = ctx.createLinearGradient(cx - R, 0, cx + R, 0);
+    line.addColorStop(0, `rgba(${rgb},0)`); line.addColorStop(0.5, `rgba(${rgb},0.22)`); line.addColorStop(1, `rgba(${rgb},0)`);
+    ctx.strokeStyle = line; ctx.beginPath(); ctx.moveTo(cx - R, cy + 6); ctx.lineTo(cx + R, cy + 6); ctx.stroke();
+    // flat scrim over the dome only, then fade the canvas edges into the page
+    ctx.globalCompositeOperation = 'destination-in';
+    const fade = ctx.createLinearGradient(0, 0, 0, H);
+    fade.addColorStop(0, 'rgba(0,0,0,0)'); fade.addColorStop(0.25, 'rgba(0,0,0,0.65)'); fade.addColorStop(0.85, 'rgba(0,0,0,0.65)'); fade.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = fade; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  const domes = [...document.querySelectorAll<HTMLCanvasElement>('canvas.dome')];
+  domes.forEach(paint);
+  let t: ReturnType<typeof setTimeout>;
+  window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => domes.forEach(paint), 150); });
+</script>
