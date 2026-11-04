@@ -1,5 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 import locations from '../../content/_locations.json';
+import domainsFile from '../../content/_domains.json';
 
 export type Entry = CollectionEntry<'content'>;
 
@@ -15,22 +16,14 @@ export interface Item {
   links: string[]; // inline [[slug]] targets found in the body
 }
 
-// Domain accent colors. Assignment is a Phase 6 visual detail; kept in one place.
-const DOMAIN_ACCENT: Record<string, string> = {
-  security: 'var(--teal)',
-  'machine-learning': 'var(--violet)',
-  cloud: 'var(--coral)',
-  web: 'var(--web)',
-};
-export const accentFor = (d: string) => DOMAIN_ACCENT[d] ?? 'var(--muted)';
-
-const DOMAIN_LABEL: Record<string, string> = {
-  security: 'Security',
-  'machine-learning': 'Machine Learning',
-  cloud: 'Cloud',
-  web: 'Web',
-};
-export const labelFor = (d: string) => DOMAIN_LABEL[d] ?? d;
+// Domain names and accent colours come from content/_domains.json, so adding a
+// domain is a content change. A domain used in content but missing there still
+// gets a page, with its slug as the name and a neutral colour.
+const DOMAINS = domainsFile as Record<string, { label: string; accent: string }>;
+export const accentFor = (d: string) => DOMAINS[d]?.accent ?? 'var(--muted)';
+export const labelFor = (d: string) => DOMAINS[d]?.label ?? d;
+/** Domains in the order listed in _domains.json (used by the nav). */
+export const domainList = () => Object.entries(DOMAINS).map(([slug, v]) => ({ slug, label: v.label, accent: v.accent }));
 
 // Topic chips for a domain, taken from the real tags on its items.
 export async function topicsInDomain(domain: string): Promise<{ tag: string; count: number }[]> {
@@ -79,11 +72,21 @@ export async function getItems(): Promise<Item[]> {
   return cache;
 }
 
+// Only domains with at least one item are shown anywhere (pages, nav, home key,
+// sitemap, terminal). An empty domain appears automatically once it has content.
 export async function getDomains(): Promise<string[]> {
   const items = await getItems();
   const set = new Set<string>();
   for (const it of items) for (const d of it.domains) set.add(d);
   return [...set].sort();
+}
+
+/** Domains with content, in the order listed in _domains.json (for the nav). */
+export async function navDomains() {
+  const live = new Set(await getDomains());
+  const listed = domainList().filter((d) => live.has(d.slug));
+  const extra = [...live].filter((d) => !DOMAINS[d]).map((slug) => ({ slug, label: labelFor(slug), accent: accentFor(slug) }));
+  return [...listed, ...extra];
 }
 
 const byDate = (a: Item, b: Item) => +new Date(b.data.date) - +new Date(a.data.date);

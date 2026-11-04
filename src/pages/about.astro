@@ -1,0 +1,53 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Title from '../components/Title.astro';
+import Dome from '../components/Dome.astro';
+import Photo from '../components/Photo.astro';
+import site from '../../content/_site.json';
+import { siteLinks } from '../lib/links';
+
+// The About page is written in content/_pages/about.md; links come from _site.json.
+const entry = await getEntry('pages', 'about');
+if (!entry) throw new Error('content/_pages/about.md is missing');
+const { Content } = await render(entry);
+const links = siteLinks();
+---
+
+<BaseLayout title={`${entry.data.title} · ${site.name}`} description={entry.data.description}>
+  <div class="page">
+    <a class="back" href="/">‹ Home</a>
+    <header class="dhead">
+      <Dome />
+      <div class="ahead">
+        <Photo size={140} class="aphoto" eager />
+        <Title text={entry.data.title} />
+      </div>
+    </header>
+    <div class="cols">
+      <article class="prose"><Content /></article>
+      {links.length > 0 && (
+        <aside class="rail">
+          <div class="panel">
+            <p class="ptitle">Elsewhere</p>
+            {links.map((l) => (
+              <a class="rlink" href={l.href} style="--d: var(--teal)" {...(l.external ? { target: '_blank', rel: 'noopener' } : {})}
+                {...(l.key === 'cv' ? { download: '' } : {})}>{l.label}</a>
+            ))}
+          </div>
+        </aside>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .ahead { display: flex; align-items: center; gap: clamp(16px, 3vw, 28px); flex-wrap: wrap; }
+  @media (max-width: 620px) { .ahead :global(.aphoto) { width: 104px; height: 104px; } }
+  .prose { max-width: 68ch; font-size: 15.5px; line-height: 1.7; color: #dcdaee; }
+  .prose :global(p) { margin: 0 0 14px; }
+  .prose :global(strong) { color: var(--text); font-family: "Space Grotesk", sans-serif; font-weight: 600; }
+  .prose :global(ul) { margin: 0 0 16px; padding-left: 20px; }
+  .prose :global(li) { margin: 4px 0; }
+  .prose :global(a) { color: var(--teal); text-underline-offset: 3px; }
+</style>

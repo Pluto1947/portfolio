@@ -20,11 +20,11 @@ This file is for Claude Code specifically. **Read `AGENTS.md` first** — it's t
 - Site generator: **Astro**, content collections + MDX. Chosen over Quartz because Astro View Transitions (used in the animation stack below) requires the Astro framework, and this build's amount of custom compositing suits Astro's flexibility better than Quartz's opinionated structure.
 - Palette "Aurora indigo": bg `#0F1226`, text `#E9E7F5`, accents `#2DD4BF` (teal), `#A78BFA` (violet), `#FB923C` (coral).
 - Typography "Geometric modern": Space Grotesk 500 for headings, Inter 400/500 for body (Google Fonts).
-- Animation stack: Astro View Transitions (page nav), GSAP + ScrollTrigger (scroll reveals), Anime.js (UI micro-interactions). See `AGENTS.md` Stack section for which layer handles what — don't blend their responsibilities or add a fourth library.
+- Animation stack: native View Transitions in CSS (page nav) and Anime.js (UI micro-interactions). GSAP was dropped by Dan. See `AGENTS.md` Stack section for which layer handles what — don't add another library.
 - Background motif: dot-halftone dome/horizon texture + flat scrim overlay, used site-wide (full version on landing, subtler echo elsewhere). See `AGENTS.md` "Confirmed design decisions" for the exact composition and implementation notes — exact shape/ring details are still refinable in Phase 6, don't treat those as needing another round of options first.
 
-**Not yet confirmed — needs real deliberation when reached, not a quick pick:**
-- Landing hero composition (globe vs. dome relationship): four candidates are pre-listed in `AGENTS.md`, Dan currently leans toward "Framed" (dome as a window around the globe, overlaid so it never blocks interactive elements). When Phase 3 or Phase 6 reaches this, actually weigh the options against the real implementation constraints at that point (masking against a WebGL canvas, hit-testing on pins/arcs, performance) and bring the trade-offs to Dan — don't just implement the leaning option by default because it's written down.
+- Landing hero: **Globe only**, centred, no heading, domain key as a small row under it. Picked in Phase 3.
+- Globe look: realistic **night lights** Earth with relief, no atmosphere glow, drawn across the whole hero with soft faded edges so it sits on the background; pins are **map pin icons with labels** and a pulsing ring. Confirmed by Dan in Phase 3. See `AGENTS.md` for details.
 
 ## Commands
 
@@ -37,6 +37,12 @@ npm run build
 
 # preview the production build locally:
 npm run preview
+
+# Dan's one step local check: pull, install, build, then preview:
+npm run local
+
+# launch readiness report (placeholders, mock places, empty domains, links):
+npm run check:launch
 
 # frontmatter validation (this IS the CI check — schema in src/content.config.ts):
 npm run build
@@ -82,7 +88,18 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 
 ## Current state
 
-- Phases 0 and 1 are done. Phase 2 (domain pages, content pages, fallback nav) is built and awaiting Dan's confirmation.
+- Phases 0 to 3 and 5 to 7 are done; Phase 4 is built with its live test deferred. Now in Phase 8 (content and launch). `npm run check:launch` lists what still blocks launch. `CHECKLIST.md` tracks Dan's deferred content, tests and later phase items: keep it updated.
+- Phases 0 to 3 are done. Phase 4 (contact form) is built on the branch: layout B (service cards plus form), picked by Dan. The real submission test is deferred by Dan: it needs form detection turned on in Netlify and one deploy to `main` (only when Dan says "deploy"). Dan asked to continue to Phase 5 meanwhile.
+- Phase 5 in progress. Done: evidence figures in write-ups (figure card frame, recordings play on click, screenshots open full size), with placeholder media in the example write-up. Also done: the site terminal, placement C (corner button or backtick on every page). Phase 5 is signed off by Dan. `whoami` text in `content/_terminal.json` is a placeholder for Dan.
+- Services and the Contact intro line are placeholders. Dan will update `content/_services.json` and the intro later.
+- Phase 6 progress: starfield (version D, depth layers plus a shooting star every 1 to 3 minutes) and the dome behind domain page headers are built, picked by Dan. The dome is also on Contact and About (Dan's pick). Web accent Sky and side by side arcs are built too (Dan's picks). Phase 6 is signed off by Dan.
+- Phases 0, 1 and 2 are done. Phase 2 was signed off by Dan after review fixes: coming soon pages for empty domains (since replaced in Phase 8: empty domains are now hidden until they have content), About and Contact stubs, a `/sitemap` page with a footer link, and phone title wrapping.
+- The domain list on the placeholder home page stays for now as a colour key. Revisit it with the hero layout in Phase 3; the nav already covers plain link navigation.
 - Already built ahead of schedule: tag filtering, hover previews, foldable groups and quick search. These were Dan's requests, so keep them.
-- Next: get Dan's Phase 2 sign off, then Phase 3 (globe and graph). The landing hero composition decision opens there. See Open questions in `AGENTS.md`.
+- Phase 3 (globe and graph) is done and signed off by Dan: globe.gl on the home page, lazy loaded, pins from `_locations.json`, journey and connected work arcs, clustering, a location panel on pin click, and zoom out through Reset view, closing the panel, or Escape. First version was rejected (beside the text, flat dotted look, weak pins, no zoom out); rebuilt to Dan's picks.
+- Locations are mock: `placeholder-a/b/c` in `_locations.json`, with the example note and theory moved onto two of them. Swap in Dan's real places and `since` dates when he sends them; no code change needed.
+- Phase 7 work is built: smaller globe bundle (stubs), WebP texture, self hosted fonts, lite mode, starfield optimisation, skip link, headings, descriptions. Signed off by Dan; the real low end phone test is still Dan's to do.
+- After Phase 7: launch polish (link previews, icon, 404, sitemap) and the home intro (option C) are built. Dan's name is Adewuyi Samuel Dan (in `content/_site.json`); his one line intro is still a placeholder.
+- Item 11 done: everything Dan edits lives in `content/` (`_domains.json`, `_site.json` with links and CV, `_pages/about.md`, `_files/`). `CONTENT.md` is his editing guide. Keep it that way: never put editable text in `src/`.
+- Photo: style A (round, teal ring) picked by Dan and built; shows in the home intro, on About and on the generated link preview once `photo` is set in `_site.json`. Dan will send the photo later.
 - Run `npm install` first in a fresh environment.

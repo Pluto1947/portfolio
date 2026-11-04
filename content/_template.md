@@ -34,7 +34,11 @@ One line: what this is and why it exists.
 
 ## 🧪 Evidence
 
-- An asciinema `.cast` or annotated screenshot living next to this file. Show, do not just tell.
+Show, do not just tell. Put the file next to this one and reference it like an image; the text in brackets becomes the caption:
+
+![What the recording shows](demo.cast)
+
+![What the screenshot shows](screenshot.png)
 
 ## 💡 Takeaway
 

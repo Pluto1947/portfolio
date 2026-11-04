@@ -1,0 +1,409 @@
+---
+// Home page globe (Phase 3). Data is built at build time from _locations.json
+// and content frontmatter; globe.gl is loaded only after the page has rendered,
+// so it never blocks first paint. Without WebGL or JS the page still works:
+// the nav, the domain list and /sitemap cover every page.
+// Earth textures are NASA imagery (public domain), served from /globe.
+import { getGlobeData } from '../lib/globe';
+import { accentFor } from '../lib/graph';
+
+const data = await getGlobeData();
+---
+
+<div class="globe-wrap">
+  <div class="globe" id="globe" role="region" aria-label="Interactive globe of places where content was made. Every item is also listed in the site navigation.">
+    <p class="globe-status" id="globe-status"></p>
+    <noscript><p class="globe-status">The globe needs JavaScript. Every page is still in the menu.</p></noscript>
+  </div>
+
+  <button class="globe-reset" id="globe-reset" type="button" hidden>
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Reset view
+  </button>
+
+  <div class="globe-panel" id="globe-panel" hidden>
+    <button class="gp-close" type="button" aria-label="Close and zoom out">×</button>
+    <p class="gp-title"></p>
+    <ul class="gp-list"></ul>
+  </div>
+
+  {data.remote.length > 0 && (
+    <div class="globe-remote">
+      <p class="ptitle">Remote</p>
+      {data.remote.map((r) => (
+        <a class="rlink" href={r.url} style={`--d:${accentFor(r.domain)}`}>{r.title}</a>
+      ))}
+    </div>
+  )}
+</div>
+
+<script type="application/json" id="globe-data" set:html={JSON.stringify({
+  ...data,
+  accents: Object.fromEntries(data.pins.flatMap((p) => p.items).concat(data.remote).map((i) => [i.domain, accentFor(i.domain)])),
+}).replace(/</g, '\\u003c')} />
+
+<style>
+  /* The globe draws across the whole hero and fades out at every edge, so it
+     sits on the page background with no visible box, even when zoomed. */
+  .globe-wrap { position: relative; width: 100%; }
+  .globe {
+    position: relative; width: 100%; height: clamp(360px, calc(100svh - 110px), 1100px); overflow: hidden;
+    --fade: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent),
+            linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
+    -webkit-mask-image: var(--fade); -webkit-mask-composite: source-in;
+    mask-image: var(--fade); mask-composite: intersect;
+  }
+  @media (max-width: 620px) { .globe { height: max(360px, 105vw); } }
+  .globe-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; text-align: center; padding: 0 20px; }
+
+  .globe-reset {
+    position: absolute; right: 12px; bottom: 12px; z-index: 6;
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 500 12.5px/1 "Inter", sans-serif; color: var(--text);
+    background: rgba(15,18,38,0.88); border: 1px solid var(--line); border-radius: 999px;
+    padding: 8px 13px; cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .globe-reset:hover, .globe-reset:focus-visible { border-color: color-mix(in srgb, var(--teal) 60%, transparent); color: #fff; outline: none; }
+
+  .globe-panel {
+    position: absolute; left: 12px; top: 12px; z-index: 6; width: min(300px, calc(100% - 24px));
+    border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px 12px;
+    background: rgba(15,18,38,0.94);
+  }
+  .gp-title { font-family: "Space Grotesk", sans-serif; font-size: 15px; margin: 0 22px 8px 0; color: var(--text); }
+  .gp-list { list-style: none; margin: 0; padding: 0; }
+  .gp-list .empty { color: var(--muted); font-size: 13px; }
+  .gp-close { position: absolute; right: 8px; top: 6px; background: none; border: 0; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; padding: 4px 6px; }
+  .gp-close:hover { color: var(--text); }
+  .globe-remote { margin-top: 14px; }
+
+  /* Pins are DOM elements placed by globe.gl, so they are styled globally.
+     The button is a zero size anchor at the exact location; the pin tip sits on it. */
+  :global(.gpin) {
+    position: relative; width: 0; height: 0; padding: 0; border: 0; background: none;
+    cursor: pointer; pointer-events: auto; transition: opacity .25s;
+  }
+  :global(.gpin .gicon) {
+    position: absolute; left: -11px; bottom: -1px; width: 22px; height: 30px;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 8px color-mix(in srgb, var(--teal) 45%, transparent));
+    transform-origin: 50% 100%; transition: transform .18s;
+  }
+  :global(.gpin .glabel) {
+    position: absolute; left: 13px; bottom: 14px; white-space: nowrap;
+    font: 500 12px/1 "Space Grotesk", sans-serif; letter-spacing: 0.01em; color: #fff;
+    background: rgba(10,12,24,0.78); border: 1px solid rgba(233,231,245,0.14);
+    padding: 4px 7px; border-radius: 6px;
+  }
+  :global(.gpin .gnum) {
+    position: absolute; left: -7px; bottom: 13px; width: 14px; text-align: center;
+    font: 600 10px/14px "Space Grotesk", sans-serif; color: #0F1226; pointer-events: none;
+  }
+  :global(.gpin:hover .gicon), :global(.gpin:focus-visible .gicon) { transform: scale(1.18); }
+  :global(.gpin:focus-visible) { outline: none; }
+  :global(.gpin:focus-visible .glabel) { border-color: var(--teal); }
+  :global(.gpin.empty .gicon) { opacity: 0.6; }
+  :global(.gpin.empty .glabel) { color: var(--muted); }
+  :global(.gpin.hidden) { opacity: 0; pointer-events: none; }
+  :global(.gpin.flip .glabel) { left: auto; right: 13px; }
+  :global(.gpin.quiet .glabel) { opacity: 0; transition: opacity .15s; }
+  :global(.gpin.quiet:hover .glabel), :global(.gpin.quiet:focus-visible .glabel) { opacity: 1; z-index: 2; }
+</style>
+
+<script>
+  type Item = { title: string; url: string; domain: string; type: string };
+  type Pin = { slug: string; label: string; lat: number; lng: number; items: Item[] };
+  type Arc = { kind: 'bio' | 'theme'; startLat: number; startLng: number; endLat: number; endLng: number; weight: number; label: string };
+  type Data = { pins: Pin[]; arcs: Arc[]; remote: Item[]; accents: Record<string, string> };
+  type Cluster = { key: string; lat: number; lng: number; pins: Pin[]; el?: HTMLElement };
+
+  const HOME = { lat: 30, lng: 10, altitude: 1.95 };
+  const PIN_SVG =
+    '<svg class="gicon" viewBox="0 0 22 30" aria-hidden="true"><path d="M11 29s9-9.2 9-17A9 9 0 0 0 2 12c0 7.8 9 17 9 17z" fill="#2DD4BF" stroke="#0F1226" stroke-width="1.5"/><circle cx="11" cy="11.5" r="3.6" fill="#0F1226"/></svg>';
+
+  const host = document.getElementById('globe') as HTMLElement | null;
+  const statusEl = document.getElementById('globe-status');
+  const panel = document.getElementById('globe-panel') as HTMLElement | null;
+  const resetBtn = document.getElementById('globe-reset') as HTMLButtonElement | null;
+  const raw = document.getElementById('globe-data')?.textContent;
+  const say = (t: string) => { if (statusEl) statusEl.textContent = t; };
+
+  const hasWebGL = () => {
+    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
+  };
+
+  function start() {
+    if (!host || !raw) return;
+    if (!hasWebGL()) return say('The globe needs WebGL. Every page is still in the menu.');
+    say('Loading globe…');
+    import('globe.gl')
+      .then(({ default: Globe }) => mount(Globe, JSON.parse(raw) as Data))
+      .catch(() => say('The globe could not load. Every page is still in the menu.'));
+  }
+
+  // Great circle distance in degrees.
+  const deg = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+    const r = Math.PI / 180, s = Math.sin, c = Math.cos;
+    const x = s(a.lat * r) * s(b.lat * r) + c(a.lat * r) * c(b.lat * r) * c((a.lng - b.lng) * r);
+    return Math.acos(Math.min(1, Math.max(-1, x))) / r;
+  };
+  // Pins closer than this many degrees merge into one cluster; shrinks as you zoom in.
+  const threshold = (altitude: number) => altitude * 1.5;
+  // Short name for the pin label: the part before the first comma.
+  const short = (label: string) => label.split(',')[0].trim();
+
+  function clusterPins(pins: Pin[], altitude: number): Cluster[] {
+    const out: Cluster[] = [];
+    for (const p of pins) {
+      const near = out.find((c) => deg(c, p) < threshold(altitude));
+      if (near) {
+        near.pins.push(p);
+        near.lat = near.pins.reduce((t, q) => t + q.lat, 0) / near.pins.length;
+        near.lng = near.pins.reduce((t, q) => t + q.lng, 0) / near.pins.length;
+      } else out.push({ key: '', lat: p.lat, lng: p.lng, pins: [p] });
+    }
+    for (const c of out) c.key = c.pins.map((p) => p.slug).sort().join('+');
+    return out;
+  }
+
+  // Route for a connected work arc: great circle from start to end, lifted a
+  // little, and bowed sideways when a journey arc joins the same two places.
+  function themePath(a: Arc, all: Arc[]): number[][] {
+    const r = Math.PI / 180;
+    const v = (lat: number, lng: number) => [Math.cos(lat * r) * Math.sin(lng * r), Math.sin(lat * r), Math.cos(lat * r) * Math.cos(lng * r)];
+    const A = v(a.startLat, a.startLng), B = v(a.endLat, a.endLng);
+    const om = Math.acos(Math.min(1, A[0] * B[0] + A[1] * B[1] + A[2] * B[2])) || 1e-6;
+    const same = (b: Arc) => b.kind === 'bio' && (
+      (b.startLat === a.startLat && b.startLng === a.startLng && b.endLat === a.endLat && b.endLng === a.endLng) ||
+      (b.startLat === a.endLat && b.startLng === a.endLng && b.endLat === a.startLat && b.endLng === a.startLng));
+    const side = all.some(same) ? 1 : 0;
+    const c = [A[1] * B[2] - A[2] * B[1], A[2] * B[0] - A[0] * B[2], A[0] * B[1] - A[1] * B[0]];
+    const cl = Math.hypot(c[0], c[1], c[2]) || 1;
+    const perp = c.map((x) => x / cl);
+    const out: number[][] = [];
+    for (let i = 0; i <= 48; i++) {
+      const s = i / 48, k1 = Math.sin((1 - s) * om) / Math.sin(om), k2 = Math.sin(s * om) / Math.sin(om), bump = Math.sin(Math.PI * s);
+      const p = [0, 1, 2].map((j) => A[j] * k1 + B[j] * k2 + perp[j] * side * om * 0.35 * bump);
+      const l = Math.hypot(p[0], p[1], p[2]);
+      const [x, y, z] = p.map((q) => q / l);
+      out.push([Math.asin(y) / r, Math.atan2(x, z) / r, om * 0.16 * bump]);
+    }
+    return out;
+  }
+
+  // No graphics hardware (software WebGL), very little memory, or Data Saver on.
+  function isWeakDevice() {
+    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
+    if (nav.connection?.saveData) return true;
+    if (nav.deviceMemory !== undefined && nav.deviceMemory <= 2) return true;
+    try {
+      const gl = document.createElement('canvas').getContext('webgl');
+      const info = gl?.getExtension('WEBGL_debug_renderer_info');
+      const name = info ? String(gl!.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+      return /swiftshader|llvmpipe|software|basic render/i.test(name);
+    } catch { return false; }
+  }
+
+  function mount(Globe: any, data: Data) {
+    if (!host) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const box = host.getBoundingClientRect();
+
+    const globe = new Globe(host, { rendererConfig: { antialias: true, alpha: true } })
+      .width(box.width).height(box.height)
+      .backgroundColor('rgba(0,0,0,0)')
+      .globeImageUrl('/globe/earth-night.webp')
+      .bumpImageUrl('/globe/earth-topology.jpg')
+      .showAtmosphere(false)
+      .onGlobeReady(() => {
+        statusEl?.remove();
+        // let the city lights glow on their own instead of being dimmed by scene lighting
+        const m = globe.globeMaterial();
+        if (m.map) { m.emissiveMap = m.map; m.emissive?.set?.('#ffffff'); m.emissiveIntensity = 0.75; m.needsUpdate = true; }
+      })
+      // pulsing rings mark every place
+      .ringsData(reduce ? [] : data.pins)
+      .ringLat('lat').ringLng('lng')
+      .ringColor((p: Pin) => (t: number) => `rgba(45,212,191,${(p.items.length ? 0.85 : 0.4) * (1 - t)})`)
+      .ringMaxRadius(3.2).ringPropagationSpeed(1.6).ringRepeatPeriod(1700)
+      // journey: animated dashed arcs along the direct route
+      .arcsData(data.arcs.filter((a: Arc) => a.kind === 'bio'))
+      .arcColor(() => '#FB923C')
+      .arcStroke(0.4)
+      .arcDashLength(0.05).arcDashGap(0.035)
+      .arcDashAnimateTime(reduce ? 0 : 6000)
+      .arcAltitudeAutoScale(0.35)
+      .arcLabel((a: Arc) => a.label)
+      // connected work: low solid paths; where one joins the same two places as
+      // a journey arc it bows out to one side, so the two never overlap
+      .pathsData(data.arcs.filter((a: Arc) => a.kind === 'theme').map((a: Arc) => ({ ...a, points: themePath(a, data.arcs) })))
+      .pathPoints('points').pathPointLat((p: number[]) => p[0]).pathPointLng((p: number[]) => p[1]).pathPointAlt((p: number[]) => p[2])
+      .pathColor(() => 'rgba(167,139,250,0.9)')
+      .pathStroke((a: Arc) => 1.8 + 0.5 * Math.sqrt(a.weight))
+      .pathTransitionDuration(0)
+      .pathLabel((a: Arc) => a.label)
+      // pins
+      .htmlLat('lat').htmlLng('lng').htmlAltitude(0.01)
+      .htmlElement((c: Cluster) => c.el!)
+      .htmlElementVisibilityModifier((el: HTMLElement, visible: boolean) => el.classList.toggle('hidden', !visible));
+
+    // Phones often have 3x screens; drawing the globe at 1.5x looks the same
+    // and is much lighter. Pause entirely when the globe can't be seen.
+    globe.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    // Lite mode for weak devices (no graphics hardware, little memory, Data Saver)
+    // and for reduced motion: the globe draws, then only redraws while someone
+    // interacts with it or a camera move is running. It looks the same, minus idle spin.
+    const lite = reduce || isWeakDevice();
+    let onScreen = true, active = !lite, idleTimer: ReturnType<typeof setTimeout> | undefined;
+    const syncRunning = () => (onScreen && !document.hidden && active ? globe.resumeAnimation() : globe.pauseAnimation());
+    const wake = (ms = 1600) => {
+      if (!lite) return;
+      active = true; syncRunning();
+      clearTimeout(idleTimer); idleTimer = setTimeout(() => { active = false; syncRunning(); }, ms);
+    };
+    new IntersectionObserver((es) => { onScreen = es.some((e) => e.isIntersecting); syncRunning(); }).observe(host);
+    document.addEventListener('visibilitychange', syncRunning);
+    if (lite) {
+      for (const ev of ['pointerdown', 'pointermove', 'wheel', 'touchstart'] as const) host.addEventListener(ev, () => wake(), { passive: true });
+      setTimeout(() => wake(2500), 0); // let textures load and the first frames draw
+    }
+
+    const controls = globe.controls();
+    controls.autoRotate = !lite;
+    controls.autoRotateSpeed = 0.35;
+    controls.minDistance = 135; // closer than this the Earth texture turns blocky
+    controls.maxDistance = 600;
+    host.addEventListener('pointerdown', () => (controls.autoRotate = false));
+
+    globe.pointOfView(HOME, 0);
+
+    // --- view helpers -----------------------------------------------------
+    const flyTo = (lat: number, lng: number, altitude: number) => {
+      wake(1400);
+      controls.autoRotate = false;
+      globe.pointOfView({ lat, lng, altitude }, 900);
+    };
+    const resetView = () => {
+      wake(1500);
+      if (panel) panel.hidden = true;
+      globe.pointOfView(HOME, 1000);
+      setTimeout(() => (controls.autoRotate = !lite), 1000);
+    };
+    const syncReset = (altitude: number) => {
+      if (resetBtn) resetBtn.hidden = altitude > HOME.altitude * 0.85 && (!panel || panel.hidden);
+    };
+    resetBtn?.addEventListener('click', resetView);
+    panel?.querySelector('.gp-close')?.addEventListener('click', resetView);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') resetView(); });
+
+    // --- pins, rebuilt only when the cluster grouping changes ----------------
+    let currentKeys = '';
+    const elFor = (c: Cluster) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = PIN_SVG;
+      const label = document.createElement('span');
+      label.className = 'glabel';
+      b.append(label);
+      if (c.pins.length > 1) {
+        b.className = 'gpin cluster';
+        label.textContent = `${c.pins.length} places`;
+        const num = document.createElement('span');
+        num.className = 'gnum'; num.textContent = String(c.pins.length); num.setAttribute('aria-hidden', 'true');
+        b.append(num);
+        b.setAttribute('aria-label', `${c.pins.length} places close together. Zoom in.`);
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // zoom until the closest two pins in the cluster fall under the split distance
+          let closest = Infinity;
+          for (const a of c.pins) for (const q of c.pins) if (a !== q) closest = Math.min(closest, deg(a, q));
+          flyTo(c.lat, c.lng, Math.max(0.36, (closest / 1.5) * 0.75));
+        });
+      } else {
+        const p = c.pins[0];
+        const count = p.items.length;
+        b.className = count ? 'gpin' : 'gpin empty';
+        label.textContent = short(p.label);
+        b.setAttribute('aria-label', `${p.label}: ${count} ${count === 1 ? 'item' : 'items'}`);
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openPanel(p);
+          flyTo(p.lat, p.lng, Math.min(globe.pointOfView().altitude, 1.4));
+        });
+      }
+      return b;
+    };
+    const refresh = (altitude: number) => {
+      const clusters = clusterPins(data.pins, altitude);
+      const keys = clusters.map((c) => c.key).sort().join(',');
+      if (keys === currentKeys) return;
+      currentKeys = keys;
+      clusters.forEach((c) => (c.el = elFor(c)));
+      globe.htmlElementsData(clusters);
+    };
+    refresh(HOME.altitude);
+    globe.onZoom((pov: { altitude: number }) => { refresh(pov.altitude); syncReset(pov.altitude); });
+
+    // --- location panel ---------------------------------------------------
+    function openPanel(p: Pin) {
+      if (!panel) return;
+      (panel.querySelector('.gp-title') as HTMLElement).textContent = p.label;
+      const list = panel.querySelector('.gp-list') as HTMLElement;
+      list.replaceChildren();
+      if (!p.items.length) {
+        const li = document.createElement('li'); li.className = 'empty'; li.textContent = 'Nothing published from here yet.'; list.append(li);
+      }
+      for (const it of p.items) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.className = 'rlink'; a.href = it.url; a.textContent = it.title;
+        a.style.setProperty('--d', data.accents[it.domain] ?? 'var(--muted)');
+        li.append(a); list.append(li);
+      }
+      panel.hidden = false;
+      if (resetBtn) resetBtn.hidden = false;
+    }
+
+    // --- label collisions --------------------------------------------------
+    // Labels that would overlap another label or run into the faded edges flip to
+    // the left of their pin; if that still collides they hide until hover.
+    const placeLabels = () => {
+      const hostBox = host.getBoundingClientRect();
+      const edge = hostBox.width * 0.1; // keep labels out of the faded edges
+      type Box = { left: number; right: number; top: number; bottom: number };
+      // seed with page elements labels must avoid (for example the home intro)
+      const placed: Box[] = [...document.querySelectorAll<HTMLElement>('[data-avoid]')].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0);
+      const hits = (r: Box) =>
+        r.left < hostBox.left + edge || r.right > hostBox.right - edge ||
+        placed.some((q) => r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top);
+      const pins = [...host.querySelectorAll<HTMLElement>('.gpin:not(.hidden)')];
+      for (const pin of pins) {
+        const label = pin.querySelector<HTMLElement>('.glabel');
+        if (!label) continue;
+        // Work out both label positions from the pin anchor, without moving the label,
+        // so classes only change when the answer changes (no flicker).
+        const a = pin.getBoundingClientRect(), w = label.offsetWidth, h = label.offsetHeight;
+        const top = a.top - 14 - h, bottom = a.top - 14;
+        const right: Box = { left: a.left + 13, right: a.left + 13 + w, top, bottom };
+        const left: Box = { left: a.left - 13 - w, right: a.left - 13, top, bottom };
+        const mode = !hits(right) ? '' : !hits(left) ? 'flip' : 'quiet';
+        pin.classList.toggle('flip', mode === 'flip');
+        pin.classList.toggle('quiet', mode === 'quiet');
+        if (mode !== 'quiet') placed.push(mode === 'flip' ? left : right);
+      }
+    };
+    setInterval(placeLabels, 200);
+
+    // keep the canvas sized to its box
+    const fit = () => { const r = host.getBoundingClientRect(); globe.width(r.width).height(r.height); };
+    new ResizeObserver(fit).observe(host);
+    fit();
+  }
+
+  // Load after the page is idle and the globe box is near the viewport.
+  const idle = (fn: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 200));
+  const go = () => idle(start);
+  if (host && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); go(); } }, { rootMargin: '200px' });
+    io.observe(host);
+  } else go();
+</script>

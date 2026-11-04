@@ -2,7 +2,7 @@
 title: "PLACEHOLDER: theory example"
 type: theory
 domains: [security]
-location: remote
+location: placeholder-b
 related: []
 tags: [example, placeholder]
 date: 2026-01-25

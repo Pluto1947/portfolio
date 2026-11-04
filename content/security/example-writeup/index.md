@@ -16,7 +16,11 @@ PLACEHOLDER. A `writeup` is a walkthrough or explainer, you teaching the reader 
 PLACEHOLDER.
 
 ## Evidence
-PLACEHOLDER: asciinema cast or annotated screenshots go here.
+PLACEHOLDER: evidence examples, replace both.
+
+![PLACEHOLDER: a terminal recording, plays on click](placeholder-demo.cast)
+
+![PLACEHOLDER: an annotated screenshot, opens full size on click](placeholder-shot.png)
 
 ## Takeaway
 PLACEHOLDER.

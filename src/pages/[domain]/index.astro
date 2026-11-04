@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Title from '../../components/Title.astro';
+import Dome from '../../components/Dome.astro';
 import {
   getDomains, itemsInDomain, groupByType, typeLabel, topicsInDomain,
   connectedDomainsForDomain, accentFor, labelFor,
@@ -20,11 +21,12 @@ const accent = accentFor(domain);
 const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
 ---
 
-<BaseLayout title={`${labelFor(domain)} — Dan`}>
+<BaseLayout title={`${labelFor(domain)} · Dan`} description={`${labelFor(domain)}: ${items.length} ${items.length === 1 ? 'item' : 'items'} across projects, write ups, notes and theory.`}>
   <div class="page" style={`--accent:${accent}`}>
     <a class="back" href="/">‹ Home</a>
 
     <header class="dhead">
+      <Dome />
       <Title text={labelFor(domain)} accent={accent} />
       <div class="dmeta">
         <span class="stat"><b>{items.length}</b> {items.length === 1 ? 'item' : 'items'}</span>
@@ -45,10 +47,10 @@ const fmt = (d: Date | string) => new Date(d).toISOString().slice(0, 10);
 
     <div class="cols">
       <div class="listcol">
-        {groups.length === 0 && <p class="empty">No content here yet.</p>}
+        {groups.length === 0 && <p class="empty">Coming soon. Nothing has been published in this domain yet.</p>}
         {groups.map((g) => (
           <details class="group" open>
-            <summary class="ghead"><span class="gname">{typeLabel(g.type)}</span><span class="gcount">{g.items.length}</span></summary>
+            <summary class="ghead"><h2 class="gname">{typeLabel(g.type)}</h2><span class="gcount">{g.items.length}</span></summary>
             {g.items.map((it) => (
               <a class="grow" href={it.url} data-slug={it.slug} data-tags={it.tags.join(' ')}>
                 <h3>{it.data.title}</h3>

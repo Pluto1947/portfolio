@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Title from '../components/Title.astro';
+// Netlify serves this for any address that doesn't exist.
+---
+
+<BaseLayout title="Not found · Dan" description="This page doesn't exist." noindex>
+  <div class="page">
+    <a class="back" href="/">‹ Home</a>
+    <header class="dhead">
+      <Title text="404: lost in space" />
+      <p class="lead">There's nothing at this address. It may have moved, or the link has a typo.</p>
+    </header>
+    <ul class="ways">
+      <li><a class="rlink" href="/" style="--d: var(--teal)">Back to the globe</a></li>
+      <li><a class="rlink" href="/sitemap" style="--d: var(--violet)">See every page</a></li>
+      <li><span class="tip">Or press <kbd>`</kbd> and type <code>ls</code> to look around.</span></li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .ways { list-style: none; margin: 26px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-width: 420px; }
+  .tip { display: block; margin-top: 10px; color: var(--muted); font-size: 13.5px; }
+  .tip kbd, .tip code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+</style>

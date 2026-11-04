@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Title from '../../components/Title.astro';
+// Netlify Forms sends visitors here after a submit when JavaScript is off.
+---
+
+<BaseLayout title="Message sent · Dan">
+  <div class="page">
+    <a class="back" href="/">‹ Home</a>
+    <header class="dhead">
+      <Title text="Message sent" />
+      <p class="lead">Thanks for getting in touch. I will reply to your email soon.</p>
+    </header>
+  </div>
+</BaseLayout>

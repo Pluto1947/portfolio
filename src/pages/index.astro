@@ -1,29 +1,140 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Globe from '../components/Globe.astro';
+import Photo from '../components/Photo.astro';
+import site from '../../content/_site.json';
+import { getDomains, itemsInDomain, accentFor, labelFor } from '../lib/graph';
+
+// Home: the globe in the hero, with the domain colour key and the arc legend
+// as one small row underneath. The intro (option C) shows the name large over
+// a dimmed globe, then settles into the top corner after 2.5 s or on any
+// interaction. It never takes clicks, so the globe stays fully usable. On phones
+// it sits above the globe instead. Name and line come from content/_site.json.
+const domains = await Promise.all(
+  (await getDomains()).map(async (d) => ({ domain: d, count: (await itemsInDomain(d)).length })),
+);
 ---
 
-<BaseLayout title="Dan — portfolio">
-  <section class="hero">
-    <span class="eyebrow">Placeholder</span>
-    <h1>The arc is the map.</h1>
-    <p>
-      Navigation is locked and live. The landing hero — globe, dome composition — and the
-      domain/content page layouts are later phases; this page exists to host the real nav.
-    </p>
+<BaseLayout title={`${site.name} · Portfolio`}>
+  <section class="hero" id="hero">
+    <div class="intro" id="intro" data-avoid>
+      <Photo size={96} class="ip" eager />
+      <div class="it">
+        <h1 class="name">{site.name}</h1>
+        <p class="line">{site.tagline}</p>
+        <p class="hint"><span class="mouse">Drag the globe, click a pin, or press <kbd>`</kbd> for the terminal</span><span class="touch">Drag the globe, tap a pin, or open the terminal</span></p>
+      </div>
+    </div>
+    <Globe />
+
+    <div class="key">
+      <ul class="domkey" aria-label="Domains">
+        {domains.map((d) => (
+          <li>
+            <a href={`/${d.domain}`} style={`--d:${accentFor(d.domain)}`}>
+              {labelFor(d.domain)}<span class="n">{d.count > 0 ? d.count : 'soon'}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="arckey" aria-hidden="true">
+        <span class="lg bio">journey</span>
+        <span class="lg theme">connected work</span>
+      </div>
+    </div>
   </section>
 </BaseLayout>
 
 <style>
   .hero {
-    display: flex; flex-direction: column; justify-content: center; gap: 18px;
-    min-height: 100vh; padding: clamp(24px, 5vw, 72px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    min-height: 100vh; padding: 0 0 clamp(12px, 3vw, 32px);
   }
-  .eyebrow { font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--teal); font-weight: 500; }
-  .hero h1 {
-    font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: clamp(30px, 5vw, 52px);
-    margin: 0; line-height: 1.06; text-wrap: balance; max-width: 14ch;
-  }
-  .hero p { color: var(--muted); max-width: 48ch; line-height: 1.6; margin: 0; font-size: 15px; }
+  .hero { position: relative; }
 
-  @media (max-width: 620px) { .hero { min-height: auto; padding: 40px 22px 64px; } }
+  /* intro: centred over a dimmed globe, then settled in the corner */
+  .intro {
+    position: absolute; z-index: 4; pointer-events: none;
+    left: 50%; top: calc(50% - 40px); transform: translate(-50%, -50%);
+    width: min(90%, 760px); text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    transition: left .9s cubic-bezier(.2,.7,.2,1), top .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1), width .9s, opacity .6s;
+  }
+  .intro .name {
+    margin: 0; font-family: "Space Grotesk", sans-serif; font-weight: 700; line-height: 1.04; text-wrap: balance;
+    font-size: clamp(36px, 5.4vw, 68px); color: #dbfff7; transition: font-size .9s cubic-bezier(.2,.7,.2,1);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--teal) 55%, transparent), 1px 0 rgba(255,77,141,0.5), -1px 0 rgba(34,233,255,0.5);
+  }
+  .intro .line { margin: 10px 0 0; color: #d6d4ea; font-size: clamp(14px, 1.5vw, 18px); transition: font-size .9s; }
+  .intro .hint { margin: 10px 0 0; color: var(--muted); font-size: 12.5px; opacity: 0; transition: opacity .5s .5s; }
+  .intro .hint kbd { font: 11.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
+  .intro .touch { display: none; }
+  @media (hover: none) { .intro .mouse { display: none; } .intro .touch { display: inline; } }
+  .hero.intro-on :global(.globe) { filter: brightness(0.38); transition: filter .9s; }
+  .hero :global(.globe) { transition: filter .9s; }
+
+  /* photo: above the name during the intro, beside it once settled */
+  .intro :global(.ip) { width: 96px; height: 96px; transition: width .9s cubic-bezier(.2,.7,.2,1), height .9s cubic-bezier(.2,.7,.2,1); }
+  .intro .it { min-width: 0; }
+  .intro.settled { left: clamp(16px, 3vw, 40px); top: clamp(16px, 4vh, 40px); transform: none; width: min(40%, 520px); text-align: left;
+    flex-direction: row; align-items: center; gap: 14px; }
+  .intro.settled :global(.ip) { width: 64px; height: 64px; }
+  .intro.settled .name { font-size: clamp(22px, 2.4vw, 32px); }
+  .intro.settled .line { font-size: 14px; }
+  .intro.settled .hint { opacity: 1; }
+
+  /* phones: no spare corner, so the intro sits above the globe in the page flow */
+  @media (max-width: 620px) {
+    .intro, .intro.settled { position: static; transform: none; width: auto; text-align: left; padding: 20px 16px 0; align-self: stretch; flex-direction: row; align-items: center; gap: 12px; }
+    .intro :global(.ip), .intro.settled :global(.ip) { width: 56px; height: 56px; }
+    .intro .name, .intro.settled .name { font-size: 28px; }
+    .intro .line { font-size: 14px; }
+    .intro .hint { opacity: 1; }
+    .hero.intro-on :global(.globe) { filter: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .intro, .intro .name, .intro .line, .intro .hint, .hero :global(.globe) { transition: none; } }
+
+  .key { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .domkey { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; }
+  .domkey a {
+    display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+    font-size: 12.5px; color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px;
+    transition: border-color .2s;
+  }
+  .domkey a::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--d); box-shadow: 0 0 8px 0 var(--d); }
+  .domkey a:hover { border-color: color-mix(in srgb, var(--d) 60%, transparent); }
+  .domkey .n { color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+
+  .arckey { display: flex; gap: 16px; font-size: 11.5px; color: var(--muted); }
+  .lg::before { content: ""; display: inline-block; width: 18px; border-top: 2px solid; margin-right: 7px; vertical-align: middle; }
+  .lg.bio::before { border-top-style: dashed; border-color: var(--coral); }
+  .lg.theme::before { border-color: var(--violet); }
+
+  @media (max-width: 620px) { .hero { min-height: auto; } }
+
+  .key { padding-inline: 16px; }
 </style>
+
+<script>
+  const hero = document.getElementById('hero');
+  const intro = document.getElementById('intro');
+  if (hero && intro) {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const phone = matchMedia('(max-width: 620px)').matches;
+    let seen = false;
+    try { seen = sessionStorage.getItem('introSeen') === '1'; } catch {}
+    const settle = () => {
+      if (intro.classList.contains('settled')) return;
+      intro.classList.add('settled'); hero.classList.remove('intro-on');
+      try { sessionStorage.setItem('introSeen', '1'); } catch {}
+      for (const ev of events) window.removeEventListener(ev, settle);
+    };
+    const events = ['pointerdown', 'wheel', 'keydown', 'touchstart'] as const;
+    if (seen || reduce || phone) settle();
+    else {
+      hero.classList.add('intro-on');
+      for (const ev of events) window.addEventListener(ev, settle, { passive: true });
+      setTimeout(settle, 2500);
+    }
+  }
+</script>

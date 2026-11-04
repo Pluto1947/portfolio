@@ -5,23 +5,19 @@
 // Works fully with no JS; Anime.js entrance + the constellation lines are
 // progressive enhancement only.
 export interface DomainLink { slug: string; label: string; accent: string; }
+import { navDomains } from '../lib/graph';
 interface Props { domains?: DomainLink[]; }
 
-// ponytail: domains hard-coded to the 4 confirmed. Derive from getCollection
-// once domain pages exist (Phase 2/3) so a new folder needs no edit here.
-const {
-  domains = [
-    { slug: 'security', label: 'Security', accent: 'var(--teal)' },
-    { slug: 'machine-learning', label: 'Machine Learning', accent: 'var(--violet)' },
-    { slug: 'cloud', label: 'Cloud', accent: 'var(--coral)' },
-    { slug: 'web', label: 'Web', accent: 'var(--web)' },
-  ],
-}: Props = Astro.props;
+// Domains come from content/_domains.json, in the order listed there. Domains
+// with no content yet are left out until they have something to show.
+const { domains = await navDomains() }: Props = Astro.props;
 
-// fan offsets for the nested sub-arc (indices align with `domains`)
-const fan = [
-  { sx: 24, sy: -38 }, { sx: 36, sy: -12 }, { sx: 36, sy: 12 }, { sx: 24, sy: 38 },
-];
+// Fan offsets for the nested sub-arc: domains sit on a gentle curve, about 25px
+// apart. With four domains this matches the original hand placed positions.
+const fan = domains.map((_, i) => {
+  const n = domains.length, t = n > 1 ? (i / (n - 1)) * 2 - 1 : 0;
+  return { sx: Math.round(36 - 12 * t * t), sy: Math.round((i - (n - 1) / 2) * 25.3) };
+});
 ---
 
 <nav aria-label="Main">

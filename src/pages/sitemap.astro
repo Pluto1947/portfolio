@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Title from '../components/Title.astro';
+import { getDomains, itemsInDomain, accentFor, labelFor, typeLabel } from '../lib/graph';
+
+// Plain HTML list of every page, independent of the globe (AGENTS.md fallback nav).
+const domains = await Promise.all(
+  (await getDomains()).map(async (d) => ({ domain: d, items: await itemsInDomain(d) })),
+);
+---
+
+<BaseLayout title="All pages · Dan">
+  <div class="page">
+    <a class="back" href="/">‹ Home</a>
+    <header class="dhead">
+      <Title text="All pages" />
+    </header>
+
+    <div class="smap">
+      <section>
+        <p class="ptitle">Site</p>
+        <a class="rlink" href="/">Home</a>
+        <a class="rlink" href="/about">About</a>
+        <a class="rlink" href="/contact">Contact</a>
+      </section>
+
+      {domains.map((d) => (
+        <section style={`--accent:${accentFor(d.domain)}`}>
+          <a class="rlink dlink" href={`/${d.domain}`} style={`--d:${accentFor(d.domain)}`}>
+            {labelFor(d.domain)}<span class="n">{d.items.length}</span>
+          </a>
+          {d.items.length === 0 && <p class="railnote">Coming soon.</p>}
+          {d.items.length > 0 && (
+            <ul>
+              {d.items.map((it) => (
+                <li>
+                  <a href={it.url}>{it.data.title}</a>
+                  <span class="t">{typeLabel(it.data.type)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .smap { display: flex; flex-direction: column; gap: 30px; margin-top: 30px; max-width: 640px; }
+  .dlink { font-family: "Space Grotesk", sans-serif; font-size: 16px; }
+  .smap ul { list-style: none; margin: 4px 0 0 16px; padding: 0 0 0 14px; border-left: 1px solid var(--line); }
+  .smap li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 5px 0; font-size: 14px; }
+  .smap li a { color: var(--text); text-decoration: none; overflow-wrap: anywhere; }
+  .smap li a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .smap .t { color: var(--muted); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; }
+</style>
