@@ -54,6 +54,11 @@ const data = await getGlobeData();
     mask-image: var(--fade); mask-composite: intersect;
   }
   @media (max-width: 620px) { .globe { height: max(360px, 105vw); } }
+  /* the globe fades in once its Earth image is on the graphics card, so the
+     brief upload pause happens while it is still invisible */
+  .globe > :global(*:not(.globe-status)) { opacity: 0; transition: opacity .8s ease; }
+  .globe.ready > :global(*:not(.globe-status)) { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .globe > :global(*:not(.globe-status)) { transition: none; } }
   .globe-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; text-align: center; padding: 0 20px; }
 
   .globe-reset {
@@ -216,6 +221,8 @@ const data = await getGlobeData();
       .showAtmosphere(false)
       .onGlobeReady(() => {
         statusEl?.remove();
+        // two frames after the texture lands, reveal the globe
+        requestAnimationFrame(() => requestAnimationFrame(() => host.classList.add('ready')));
         // let the city lights glow on their own instead of being dimmed by scene lighting
         const m = globe.globeMaterial();
         if (m.map) { m.emissiveMap = m.map; m.emissive?.set?.('#ffffff'); m.emissiveIntensity = 0.75; m.needsUpdate = true; }
