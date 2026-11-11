@@ -1,22 +1,38 @@
 ---
-// Home page globe (Phase 3). Data is built at build time from _locations.json
-// and content frontmatter; globe.gl is loaded only after the page has rendered,
-// so it never blocks first paint. Without WebGL or JS the page still works:
-// the nav, the domain list and /sitemap cover every page.
-// Earth textures are NASA imagery (public domain), served from /globe.
+// Home page globe. Data is built at build time from _locations.json and content
+// frontmatter; globe.gl is loaded only after the page has rendered, so it never
+// blocks first paint. Without WebGL or JS the page still works: the nav, the
+// domain key and /sitemap cover every page.
+//
+// Earth: NASA night lights (public domain), served from /globe. Zoomed in, sharper
+// NASA "Black Marble" tiles load from NASA GIBS for the area in view; today's image
+// stays underneath, so the globe never goes blank and still works if NASA is down.
+// Geography: faint coastlines, country borders and fading country names
+// (Natural Earth 110m via world-atlas, public domain) from /globe/geo.json.
+// Pins carry no text; hovering or focusing one shows a card. A journey tour flies
+// through places with a "since" date, in order.
 import { getGlobeData } from '../lib/globe';
 import { accentFor } from '../lib/graph';
 
 const data = await getGlobeData();
+const journeyCount = data.pins.filter((p) => p.since).length;
 ---
 
-<div class="globe-wrap">
+<div class="globe-wrap" id="globe-wrap">
   <div class="globe" id="globe" role="region" aria-label="Interactive globe of places where content was made. Every item is also listed in the site navigation.">
     <p class="globe-status" id="globe-status"></p>
     <noscript><p class="globe-status">The globe needs JavaScript. Every page is still in the menu.</p></noscript>
   </div>
 
-  <button class="globe-reset" id="globe-reset" type="button" hidden>
+  <div class="globe-card" id="globe-card" role="tooltip" hidden></div>
+  <div class="globe-caption" id="globe-caption" aria-live="polite" hidden></div>
+
+  {journeyCount >= 2 && (
+    <button class="globe-btn globe-tour" id="globe-tour" type="button" hidden>
+      <span class="ico" aria-hidden="true">▶</span> <span class="txt">Play my journey</span>
+    </button>
+  )}
+  <button class="globe-btn globe-reset" id="globe-reset" type="button" hidden>
     <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Reset view
   </button>
@@ -54,21 +70,49 @@ const data = await getGlobeData();
     mask-image: var(--fade); mask-composite: intersect;
   }
   @media (max-width: 620px) { .globe { height: max(360px, 105vw); } }
-  /* the globe fades in once its Earth image is on the graphics card, so the
-     brief upload pause happens while it is still invisible */
+  /* the globe fades in once its Earth image is on the graphics card */
   .globe > :global(*:not(.globe-status)) { opacity: 0; transition: opacity .8s ease; }
   .globe.ready > :global(*:not(.globe-status)) { opacity: 1; }
   @media (prefers-reduced-motion: reduce) { .globe > :global(*:not(.globe-status)) { transition: none; } }
   .globe-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); font-size: 13px; text-align: center; padding: 0 20px; }
 
-  .globe-reset {
-    position: absolute; right: 12px; bottom: 12px; z-index: 6;
+  .globe-btn {
+    position: absolute; bottom: 12px; z-index: 6;
     display: inline-flex; align-items: center; gap: 7px;
     font: 500 12.5px/1 "Inter", sans-serif; color: var(--text);
     background: rgba(15,18,38,0.88); border: 1px solid var(--line); border-radius: 999px;
     padding: 8px 13px; cursor: pointer; transition: border-color .2s, color .2s;
   }
-  .globe-reset:hover, .globe-reset:focus-visible { border-color: color-mix(in srgb, var(--teal) 60%, transparent); color: #fff; outline: none; }
+  .globe-btn:hover, .globe-btn:focus-visible { border-color: color-mix(in srgb, var(--teal) 60%, transparent); color: #fff; outline: none; }
+  .globe-reset { right: 12px; }
+  .globe-tour { left: 12px; border-color: color-mix(in srgb, var(--coral) 45%, transparent); }
+  .globe-tour .ico { color: var(--coral); font-size: 10px; }
+  .globe-tour:hover, .globe-tour:focus-visible { border-color: var(--coral); }
+
+  /* hover card: what happened at a place, without clicking */
+  .globe-card {
+    position: absolute; z-index: 7; width: min(290px, calc(100% - 24px)); pointer-events: none;
+    border: 1px solid rgba(233,231,245,0.18); border-radius: 12px; padding: 12px 14px;
+    background: rgba(15,18,38,0.96); box-shadow: 0 16px 40px -14px rgba(0,0,0,0.8);
+  }
+  .globe-card :global(.t) { font: 600 14px/1.25 "Space Grotesk", sans-serif; margin: 0; color: var(--text); }
+  .globe-card :global(.m) { font-size: 12px; color: var(--muted); margin: 3px 0 8px; }
+  .globe-card :global(ul) { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+  .globe-card :global(li) { font-size: 12.5px; line-height: 1.35; display: flex; gap: 8px; align-items: baseline; color: #dcdaee; }
+  .globe-card :global(li::before) { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--d, var(--teal)); transform: translateY(-1px); }
+  .globe-card :global(li span) { color: var(--muted); font-size: 11px; margin-left: auto; padding-left: 8px; white-space: nowrap; }
+  .globe-card :global(.more) { font-size: 11.5px; color: var(--muted); margin: 6px 0 0; }
+  .globe-card :global(.f) { margin: 8px 0 0; font-size: 11px; color: var(--teal); }
+
+  /* journey caption */
+  .globe-caption {
+    position: absolute; z-index: 7; left: 50%; top: 14px; transform: translateX(-50%); max-width: calc(100% - 32px);
+    text-align: center; border: 1px solid color-mix(in srgb, var(--coral) 50%, transparent); border-radius: 12px;
+    padding: 10px 16px; background: rgba(15,18,38,0.94); pointer-events: none;
+  }
+  .globe-caption :global(b) { display: block; font: 600 15px/1.25 "Space Grotesk", sans-serif; color: var(--text); }
+  .globe-caption :global(i) { font-style: normal; color: var(--coral); margin-right: 7px; }
+  .globe-caption :global(span) { font-size: 12.5px; color: #d6d4ea; }
 
   .globe-panel {
     position: absolute; left: 12px; top: 12px; z-index: 6; width: min(300px, calc(100% - 24px));
@@ -93,44 +137,57 @@ const data = await getGlobeData();
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 8px color-mix(in srgb, var(--teal) 45%, transparent));
     transform-origin: 50% 100%; transition: transform .18s;
   }
-  :global(.gpin .glabel) {
-    position: absolute; left: 13px; bottom: 14px; white-space: nowrap;
-    font: 500 12px/1 "Space Grotesk", sans-serif; letter-spacing: 0.01em; color: #fff;
-    background: rgba(10,12,24,0.78); border: 1px solid rgba(233,231,245,0.14);
-    padding: 4px 7px; border-radius: 6px;
-  }
   :global(.gpin .gnum) {
     position: absolute; left: -7px; bottom: 13px; width: 14px; text-align: center;
     font: 600 10px/14px "Space Grotesk", sans-serif; color: #0F1226; pointer-events: none;
   }
-  :global(.gpin:hover .gicon), :global(.gpin:focus-visible .gicon) { transform: scale(1.18); }
+  :global(.gpin:hover .gicon), :global(.gpin:focus-visible .gicon), :global(.gpin.on .gicon) { transform: scale(1.18); }
   :global(.gpin:focus-visible) { outline: none; }
-  :global(.gpin:focus-visible .glabel) { border-color: var(--teal); }
   :global(.gpin.empty .gicon) { opacity: 0.6; }
-  :global(.gpin.empty .glabel) { color: var(--muted); }
   :global(.gpin.hidden) { opacity: 0; pointer-events: none; }
-  :global(.gpin.flip .glabel) { left: auto; right: 13px; }
-  :global(.gpin.quiet .glabel) { opacity: 0; transition: opacity .15s; }
-  :global(.gpin.quiet:hover .glabel), :global(.gpin.quiet:focus-visible .glabel) { opacity: 1; z-index: 2; }
+
+  /* country names: fade in as you zoom, never clickable */
+  :global(.cname) {
+    transform: translate(-50%, -50%); white-space: nowrap; pointer-events: none;
+    font: 500 10.5px/1 "Space Grotesk", sans-serif; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(214,226,255,0.55); text-shadow: 0 1px 3px rgba(0,0,0,0.9); transition: opacity .3s;
+  }
+  :global(.cname.off), :global(.cname.hidden) { opacity: 0; }
 </style>
 
 <script>
-  type Item = { title: string; url: string; domain: string; type: string };
-  type Pin = { slug: string; label: string; lat: number; lng: number; items: Item[] };
+  type Item = { title: string; url: string; domain: string; type: string; year: string };
+  type Pin = { slug: string; label: string; lat: number; lng: number; since: string; items: Item[] };
   type Arc = { kind: 'bio' | 'theme'; startLat: number; startLng: number; endLat: number; endLng: number; weight: number; label: string };
   type Data = { pins: Pin[]; arcs: Arc[]; remote: Item[]; accents: Record<string, string> };
-  type Cluster = { key: string; lat: number; lng: number; pins: Pin[]; el?: HTMLElement };
+  type Cluster = { kind: 'pin'; key: string; lat: number; lng: number; pins: Pin[]; el?: HTMLElement };
+  type Name = { kind: 'name'; name: string; lat: number; lng: number; rank: number; el?: HTMLElement };
+  type Geo = { coast: number[][][]; borders: number[][][]; labels: { name: string; lat: number; lng: number; rank: number }[] };
 
   const HOME = { lat: 30, lng: 10, altitude: 1.95 };
+  // NASA GIBS: VIIRS Black Marble night lights, Web Mercator tiles, levels 0 to 8
+  const TILE_URL = (x: number, y: number, l: number) =>
+    `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/2016-01-01/GoogleMapsCompatible_Level8/${l}/${y}/${x}.png`;
+  const TILES_BELOW = 0.55; // altitude under which detail tiles switch on
   const PIN_SVG =
     '<svg class="gicon" viewBox="0 0 22 30" aria-hidden="true"><path d="M11 29s9-9.2 9-17A9 9 0 0 0 2 12c0 7.8 9 17 9 17z" fill="#2DD4BF" stroke="#0F1226" stroke-width="1.5"/><circle cx="11" cy="11.5" r="3.6" fill="#0F1226"/></svg>';
 
+  const wrap = document.getElementById('globe-wrap') as HTMLElement | null;
   const host = document.getElementById('globe') as HTMLElement | null;
   const statusEl = document.getElementById('globe-status');
   const panel = document.getElementById('globe-panel') as HTMLElement | null;
+  const card = document.getElementById('globe-card') as HTMLElement | null;
+  const caption = document.getElementById('globe-caption') as HTMLElement | null;
   const resetBtn = document.getElementById('globe-reset') as HTMLButtonElement | null;
+  const tourBtn = document.getElementById('globe-tour') as HTMLButtonElement | null;
   const raw = document.getElementById('globe-data')?.textContent;
   const say = (t: string) => { if (statusEl) statusEl.textContent = t; };
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+  const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // "2018-09" reads as "Sep 2018"; a bare year stays as it is
+  const when = (since: string) => { const [y, m] = since.split('-'); return m ? `${MONTHS[+m - 1] ?? ''} ${y}`.trim() : y; };
+  const kind = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
   const hasWebGL = () => {
     try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }
@@ -153,8 +210,6 @@ const data = await getGlobeData();
   };
   // Pins closer than this many degrees merge into one cluster; shrinks as you zoom in.
   const threshold = (altitude: number) => altitude * 1.5;
-  // Short name for the pin label: the part before the first comma.
-  const short = (label: string) => label.split(',')[0].trim();
 
   function clusterPins(pins: Pin[], altitude: number): Cluster[] {
     const out: Cluster[] = [];
@@ -164,7 +219,7 @@ const data = await getGlobeData();
         near.pins.push(p);
         near.lat = near.pins.reduce((t, q) => t + q.lat, 0) / near.pins.length;
         near.lng = near.pins.reduce((t, q) => t + q.lng, 0) / near.pins.length;
-      } else out.push({ key: '', lat: p.lat, lng: p.lng, pins: [p] });
+      } else out.push({ kind: 'pin', key: '', lat: p.lat, lng: p.lng, pins: [p] });
     }
     for (const c of out) c.key = c.pins.map((p) => p.slug).sort().join('+');
     return out;
@@ -209,9 +264,17 @@ const data = await getGlobeData();
   }
 
   function mount(Globe: any, data: Data) {
-    if (!host) return;
+    if (!host || !wrap) return;
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canHover = matchMedia('(hover: hover)').matches;
+    const lite = reduce || isWeakDevice();
     const box = host.getBoundingClientRect();
+    let altitude = HOME.altitude;
+    let themePaths: object[] = [];
+    let geoPaths: object[] = [];
+    let names: Name[] = [];
+    let clusters: Cluster[] = [];
+    let touring = false, tourRun = 0; // journey tour state, used by the card and controls below
 
     const globe = new Globe(host, { rendererConfig: { antialias: true, alpha: true } })
       .width(box.width).height(box.height)
@@ -219,13 +282,14 @@ const data = await getGlobeData();
       .globeImageUrl('/globe/earth-night.webp')
       .bumpImageUrl('/globe/earth-topology.jpg')
       .showAtmosphere(false)
+      .globeTileEngineMaxLevel(8)
       .onGlobeReady(() => {
         statusEl?.remove();
-        // two frames after the texture lands, reveal the globe
         requestAnimationFrame(() => requestAnimationFrame(() => host.classList.add('ready')));
         // let the city lights glow on their own instead of being dimmed by scene lighting
         const m = globe.globeMaterial();
         if (m.map) { m.emissiveMap = m.map; m.emissive?.set?.('#ffffff'); m.emissiveIntensity = 0.75; m.needsUpdate = true; }
+        if (tourBtn) tourBtn.hidden = false;
       })
       // pulsing rings mark every place
       .ringsData(reduce ? [] : data.pins)
@@ -240,26 +304,31 @@ const data = await getGlobeData();
       .arcDashAnimateTime(reduce ? 0 : 6000)
       .arcAltitudeAutoScale(0.35)
       .arcLabel((a: Arc) => a.label)
-      // connected work: low solid paths; where one joins the same two places as
-      // a journey arc it bows out to one side, so the two never overlap
-      .pathsData(data.arcs.filter((a: Arc) => a.kind === 'theme').map((a: Arc) => ({ ...a, points: themePath(a, data.arcs) })))
-      .pathPoints('points').pathPointLat((p: number[]) => p[0]).pathPointLng((p: number[]) => p[1]).pathPointAlt((p: number[]) => p[2])
-      .pathColor(() => 'rgba(167,139,250,0.9)')
-      .pathStroke((a: Arc) => 1.8 + 0.5 * Math.sqrt(a.weight))
+      // one paths layer holds both connected work (fat violet lines) and the
+      // coastlines and borders (thin, faint lines)
+      .pathPoints('points').pathPointLat((p: number[]) => p[0]).pathPointLng((p: number[]) => p[1]).pathPointAlt((p: number[]) => p[2] ?? 0.0015)
+      .pathColor((d: { kind: string }) => d.kind === 'theme' ? 'rgba(167,139,250,0.9)' : d.kind === 'coast' ? 'rgba(170,205,255,0.5)' : 'rgba(170,205,255,0.24)')
+      .pathStroke((d: { kind: string; weight?: number }) => (d.kind === 'theme' ? 1.8 + 0.5 * Math.sqrt(d.weight ?? 1) : null))
       .pathTransitionDuration(0)
-      .pathLabel((a: Arc) => a.label)
-      // pins
-      .htmlLat('lat').htmlLng('lng').htmlAltitude(0.01)
-      .htmlElement((c: Cluster) => c.el!)
+      .pathLabel((d: { kind: string; label?: string }) => (d.kind === 'theme' ? d.label : ''))
+      // pins and country names share the HTML layer
+      .htmlLat('lat').htmlLng('lng').htmlAltitude((d: Cluster | Name) => (d.kind === 'pin' ? 0.01 : 0.002))
+      .htmlElement((d: Cluster | Name) => d.el!)
       .htmlElementVisibilityModifier((el: HTMLElement, visible: boolean) => el.classList.toggle('hidden', !visible));
+
+    themePaths = data.arcs.filter((a: Arc) => a.kind === 'theme').map((a: Arc) => ({ ...a, kind: 'theme', points: themePath(a, data.arcs) }));
+    // borders are a coarse world outline: fade them out very close up, where the
+    // detailed NASA lights already show every coast and city
+    const BORDERS_ABOVE = 0.22;
+    let bordersShown = true;
+    const syncPaths = () => globe.pathsData([...(bordersShown ? geoPaths : []), ...themePaths]);
+    syncPaths();
 
     // Phones often have 3x screens; drawing the globe at 1.5x looks the same
     // and is much lighter. Pause entirely when the globe can't be seen.
     globe.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-    // Lite mode for weak devices (no graphics hardware, little memory, Data Saver)
-    // and for reduced motion: the globe draws, then only redraws while someone
-    // interacts with it or a camera move is running. It looks the same, minus idle spin.
-    const lite = reduce || isWeakDevice();
+    // Lite mode for weak devices and for reduced motion: the globe only redraws
+    // while someone interacts with it or a camera move is running.
     let onScreen = true, active = !lite, idleTimer: ReturnType<typeof setTimeout> | undefined;
     const syncRunning = () => (onScreen && !document.hidden && active ? globe.resumeAnimation() : globe.pauseAnimation());
     const wake = (ms = 1600) => {
@@ -271,36 +340,133 @@ const data = await getGlobeData();
     document.addEventListener('visibilitychange', syncRunning);
     if (lite) {
       for (const ev of ['pointerdown', 'pointermove', 'wheel', 'touchstart'] as const) host.addEventListener(ev, () => wake(), { passive: true });
-      setTimeout(() => wake(2500), 0); // let textures load and the first frames draw
+      setTimeout(() => wake(2500), 0);
     }
 
     const controls = globe.controls();
+    let userStopped = false;
     controls.autoRotate = !lite;
     controls.autoRotateSpeed = 0.35;
-    controls.minDistance = 135; // closer than this the Earth texture turns blocky
+    controls.minDistance = 104; // NASA tiles stay sharp down to here
     controls.maxDistance = 600;
-    host.addEventListener('pointerdown', () => (controls.autoRotate = false));
+    host.addEventListener('pointerdown', () => { controls.autoRotate = false; userStopped = true; stopTour(); });
+    host.addEventListener('wheel', () => stopTour(), { passive: true });
 
     globe.pointOfView(HOME, 0);
 
+    // --- NASA detail tiles ----------------------------------------------------
+    // Close up, NASA tiles load for the area in view. Today's image stays visible
+    // just underneath (three-globe would hide it), so nothing goes blank while
+    // tiles arrive, and the globe still works if NASA cannot be reached. New tiles
+    // get the same self lit glow as the base image.
+    let tilesOn = false;
+    // the sphere carrying today's Earth image, found by its texture
+    let baseMesh: any = null;
+    const findBase = () => {
+      if (baseMesh) return baseMesh;
+      globe.scene().traverse((o: any) => {
+        const src = o.isMesh && o.material?.map?.image && (o.material.map.image.currentSrc || o.material.map.image.src || '');
+        if (!baseMesh && src && String(src).includes('earth-night')) baseMesh = o;
+      });
+      return baseMesh;
+    };
+    const glowTiles = () => {
+      // three-globe hides the base image whenever tiles are on; keep it showing
+      // just underneath, so areas still loading show today's image, not black
+      const base = findBase();
+      if (base && tilesOn) base.visible = true;
+      globe.scene().traverse((o: any) => {
+        const m = o.isMesh && o.material;
+        if (m && m.isMeshLambertMaterial && m.map && !m.userData.glow) {
+          // show NASA's colours exactly: no scene lighting, the image as its own light
+          // (the tile engine sets color to null; give it a real black colour of the same type)
+          m.color = m.emissive.clone().setRGB(0, 0, 0);
+          m.emissiveMap = m.map; m.emissive.setRGB(1, 1, 1); m.emissiveIntensity = 1; m.userData.glow = true; m.needsUpdate = true;
+        }
+      });
+    };
+    let glowTimer: ReturnType<typeof setInterval> | undefined;
+    const setTiles = (on: boolean) => {
+      if (on === tilesOn) return;
+      tilesOn = on;
+      globe.globeTileEngineUrl(on ? TILE_URL : null);
+      const base = findBase();
+      if (base) { base.visible = true; base.scale.setScalar(on ? 0.998 : 1); }
+      clearInterval(glowTimer);
+      if (on) { setTimeout(glowTiles, 0); glowTimer = setInterval(glowTiles, 250); }
+    };
+
+    // --- coastlines, borders and country names (loaded after the globe) ------
+    const nameShown = (rank: number) => rank < (altitude > 1.6 ? 14 : altitude > 1.0 ? 32 : 70);
+    const syncNames = () => names.forEach((n) => n.el?.classList.toggle('off', !nameShown(n.rank)));
+    fetch('/globe/geo.json').then((r) => (r.ok ? r.json() : null)).then((geo: Geo | null) => {
+      if (!geo) return;
+      geoPaths = [...geo.coast.map((points) => ({ kind: 'coast', points })), ...geo.borders.map((points) => ({ kind: 'border', points }))];
+      syncPaths();
+      names = geo.labels.map((l) => {
+        const el = document.createElement('div');
+        el.className = 'cname'; el.textContent = l.name; el.setAttribute('aria-hidden', 'true');
+        return { kind: 'name', ...l, el };
+      });
+      syncNames();
+      globe.htmlElementsData([...clusters, ...names]);
+    }).catch(() => {});
+
     // --- view helpers -----------------------------------------------------
-    const flyTo = (lat: number, lng: number, altitude: number) => {
-      wake(1400);
+    const flyTo = (lat: number, lng: number, alt: number, ms = 900) => {
+      wake(ms + 500);
       controls.autoRotate = false;
-      globe.pointOfView({ lat, lng, altitude }, 900);
+      globe.pointOfView({ lat, lng, altitude: alt }, ms);
     };
     const resetView = () => {
       wake(1500);
+      stopTour();
       if (panel) panel.hidden = true;
+      hideCard();
       globe.pointOfView(HOME, 1000);
+      userStopped = false;
       setTimeout(() => (controls.autoRotate = !lite), 1000);
     };
-    const syncReset = (altitude: number) => {
-      if (resetBtn) resetBtn.hidden = altitude > HOME.altitude * 0.85 && (!panel || panel.hidden);
+    const syncReset = (alt: number) => {
+      if (resetBtn) resetBtn.hidden = alt > HOME.altitude * 0.85 && (!panel || panel.hidden);
     };
     resetBtn?.addEventListener('click', resetView);
     panel?.querySelector('.gp-close')?.addEventListener('click', resetView);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') resetView(); });
+
+    // --- hover card ---------------------------------------------------------
+    let cardFor: HTMLElement | null = null;
+    function showCard(el: HTMLElement, html: string) {
+      if (!card || !wrap) return;
+      card.innerHTML = html;
+      card.hidden = false;
+      cardFor = el; el.classList.add('on');
+      if (!userStopped) controls.autoRotate = false; // hold still while reading
+      const w = wrap.getBoundingClientRect(), r = el.getBoundingClientRect();
+      let x = r.left - w.left + 20, y = r.top - w.top - 24;
+      if (x + card.offsetWidth > w.width - 12) x = r.left - w.left - card.offsetWidth - 20;
+      card.style.left = Math.max(12, x) + 'px';
+      card.style.top = Math.max(12, Math.min(y, w.height - card.offsetHeight - 12)) + 'px';
+    }
+    function hideCard() {
+      if (card) card.hidden = true;
+      cardFor?.classList.remove('on'); cardFor = null;
+      if (!userStopped && !touring) controls.autoRotate = !lite;
+    }
+    const placeCard = (p: Pin) => {
+      const shown = p.items.slice(0, 5);
+      return `<p class="t">${esc(p.label)}</p>` +
+        `<p class="m">${p.since ? `Since ${esc(when(p.since))} · ` : ''}${plural(p.items.length, 'item')}</p>` +
+        (p.items.length
+          ? `<ul>${shown.map((i) => `<li style="--d:${data.accents[i.domain] ?? 'var(--teal)'}">${esc(i.title)}<span>${esc(kind(i.type))} · ${esc(i.year)}</span></li>`).join('')}</ul>` +
+            (p.items.length > shown.length ? `<p class="more">and ${p.items.length - shown.length} more</p>` : '')
+          : '<p class="m" style="margin:0">Nothing published from here yet.</p>') +
+        '<p class="f">Click to open this place</p>';
+    };
+    const clusterCard = (c: Cluster) =>
+      `<p class="t">${c.pins.length} places close together</p>` +
+      `<ul>${c.pins.map((p) => `<li>${esc(p.label.split(',')[0])}<span>${plural(p.items.length, 'item')}</span></li>`).join('')}</ul>` +
+      '<p class="f">Click to zoom in</p>';
 
     // --- pins, rebuilt only when the cluster grouping changes ----------------
     let currentKeys = '';
@@ -308,47 +474,56 @@ const data = await getGlobeData();
       const b = document.createElement('button');
       b.type = 'button';
       b.innerHTML = PIN_SVG;
-      const label = document.createElement('span');
-      label.className = 'glabel';
-      b.append(label);
+      const html = () => (c.pins.length > 1 ? clusterCard(c) : placeCard(c.pins[0]));
+      if (canHover) {
+        b.addEventListener('mouseenter', () => showCard(b, html()));
+        b.addEventListener('mouseleave', hideCard);
+      }
+      b.addEventListener('focus', () => showCard(b, html()));
+      b.addEventListener('blur', hideCard);
       if (c.pins.length > 1) {
         b.className = 'gpin cluster';
-        label.textContent = `${c.pins.length} places`;
         const num = document.createElement('span');
         num.className = 'gnum'; num.textContent = String(c.pins.length); num.setAttribute('aria-hidden', 'true');
         b.append(num);
-        b.setAttribute('aria-label', `${c.pins.length} places close together. Zoom in.`);
+        b.setAttribute('aria-label', `${c.pins.length} places close together: ${c.pins.map((p) => p.label).join('; ')}. Zoom in.`);
         b.addEventListener('click', (e) => {
-          e.stopPropagation();
-          // zoom until the closest two pins in the cluster fall under the split distance
+          e.stopPropagation(); hideCard();
           let closest = Infinity;
           for (const a of c.pins) for (const q of c.pins) if (a !== q) closest = Math.min(closest, deg(a, q));
-          flyTo(c.lat, c.lng, Math.max(0.36, (closest / 1.5) * 0.75));
+          flyTo(c.lat, c.lng, Math.max(0.2, (closest / 1.5) * 0.75));
         });
       } else {
         const p = c.pins[0];
         const count = p.items.length;
         b.className = count ? 'gpin' : 'gpin empty';
-        label.textContent = short(p.label);
-        b.setAttribute('aria-label', `${p.label}: ${count} ${count === 1 ? 'item' : 'items'}`);
+        b.setAttribute('aria-label', `${p.label}${p.since ? `, since ${when(p.since)}` : ''}: ${plural(count, 'item')}`);
         b.addEventListener('click', (e) => {
-          e.stopPropagation();
+          e.stopPropagation(); hideCard();
           openPanel(p);
           flyTo(p.lat, p.lng, Math.min(globe.pointOfView().altitude, 1.4));
         });
       }
       return b;
     };
-    const refresh = (altitude: number) => {
-      const clusters = clusterPins(data.pins, altitude);
-      const keys = clusters.map((c) => c.key).sort().join(',');
+    const refresh = (alt: number) => {
+      const next = clusterPins(data.pins, alt);
+      const keys = next.map((c) => c.key).sort().join(',');
       if (keys === currentKeys) return;
       currentKeys = keys;
-      clusters.forEach((c) => (c.el = elFor(c)));
-      globe.htmlElementsData(clusters);
+      hideCard();
+      next.forEach((c) => (c.el = elFor(c)));
+      clusters = next;
+      globe.htmlElementsData([...clusters, ...names]);
     };
     refresh(HOME.altitude);
-    globe.onZoom((pov: { altitude: number }) => { refresh(pov.altitude); syncReset(pov.altitude); });
+    globe.onZoom((pov: { altitude: number }) => {
+      if (Math.abs(pov.altitude - altitude) > 0.02) hideCard();
+      altitude = pov.altitude;
+      refresh(altitude); syncReset(altitude); syncNames();
+      setTiles(altitude < TILES_BELOW);
+      if ((altitude >= BORDERS_ABOVE) !== bordersShown) { bordersShown = altitude >= BORDERS_ABOVE; syncPaths(); }
+    });
 
     // --- location panel ---------------------------------------------------
     function openPanel(p: Pin) {
@@ -370,35 +545,45 @@ const data = await getGlobeData();
       if (resetBtn) resetBtn.hidden = false;
     }
 
-    // --- label collisions --------------------------------------------------
-    // Labels that would overlap another label or run into the faded edges flip to
-    // the left of their pin; if that still collides they hide until hover.
-    const placeLabels = () => {
-      const hostBox = host.getBoundingClientRect();
-      const edge = hostBox.width * 0.1; // keep labels out of the faded edges
-      type Box = { left: number; right: number; top: number; bottom: number };
-      // seed with page elements labels must avoid (for example the home intro)
-      const placed: Box[] = [...document.querySelectorAll<HTMLElement>('[data-avoid]')].map((el) => el.getBoundingClientRect()).filter((r) => r.width > 0);
-      const hits = (r: Box) =>
-        r.left < hostBox.left + edge || r.right > hostBox.right - edge ||
-        placed.some((q) => r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top);
-      const pins = [...host.querySelectorAll<HTMLElement>('.gpin:not(.hidden)')];
-      for (const pin of pins) {
-        const label = pin.querySelector<HTMLElement>('.glabel');
-        if (!label) continue;
-        // Work out both label positions from the pin anchor, without moving the label,
-        // so classes only change when the answer changes (no flicker).
-        const a = pin.getBoundingClientRect(), w = label.offsetWidth, h = label.offsetHeight;
-        const top = a.top - 14 - h, bottom = a.top - 14;
-        const right: Box = { left: a.left + 13, right: a.left + 13 + w, top, bottom };
-        const left: Box = { left: a.left - 13 - w, right: a.left - 13, top, bottom };
-        const mode = !hits(right) ? '' : !hits(left) ? 'flip' : 'quiet';
-        pin.classList.toggle('flip', mode === 'flip');
-        pin.classList.toggle('quiet', mode === 'quiet');
-        if (mode !== 'quiet') placed.push(mode === 'flip' ? left : right);
+    // --- journey tour -------------------------------------------------------
+    // Flies through places with a "since" date, oldest first, with a caption at
+    // each stop. Any click, drag, scroll or Escape on the globe stops it.
+    const journey = data.pins.filter((p) => p.since).sort((a, b) => a.since.localeCompare(b.since));
+    function setTourButton() {
+      if (!tourBtn) return;
+      (tourBtn.querySelector('.ico') as HTMLElement).textContent = touring ? '■' : '▶';
+      (tourBtn.querySelector('.txt') as HTMLElement).textContent = touring ? 'Stop' : 'Play my journey';
+    }
+    function stopTour() {
+      if (!touring) return;
+      touring = false; tourRun++;
+      if (caption) caption.hidden = true;
+      setTourButton();
+    }
+    async function playTour() {
+      if (journey.length < 2) return;
+      const run = ++tourRun;
+      touring = true; setTourButton(); hideCard();
+      if (panel) panel.hidden = true;
+      controls.autoRotate = false;
+      const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      for (const p of journey) {
+        if (run !== tourRun) return;
+        flyTo(p.lat - 3, p.lng, 1.05, reduce ? 0 : 1600);
+        await wait(reduce ? 200 : 1700);
+        if (run !== tourRun || !caption) return;
+        const what = p.items.length ? p.items.slice(0, 3).map((i) => esc(i.title)).join(' · ') : 'Nothing published from here yet';
+        caption.innerHTML = `<b><i>${esc(when(p.since))}</i>${esc(p.label)}</b><span>${what}</span>`;
+        caption.hidden = false;
+        wake(2600);
+        await wait(2600);
       }
-    };
-    setInterval(placeLabels, 200);
+      if (run !== tourRun) return;
+      touring = false; setTourButton();
+      if (caption) caption.hidden = true;
+      resetView();
+    }
+    tourBtn?.addEventListener('click', () => (touring ? stopTour() : playTour()));
 
     // keep the canvas sized to its box
     const fit = () => { const r = host.getBoundingClientRect(); globe.width(r.width).height(r.height); };

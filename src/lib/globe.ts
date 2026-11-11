@@ -8,8 +8,8 @@ import { getItems, type Item } from './graph';
 type Loc = { lat?: number; lng?: number; label: string; since?: string };
 const LOCS = locations as Record<string, Loc>;
 
-export interface GlobeItem { title: string; url: string; domain: string; type: string }
-export interface GlobePin { slug: string; label: string; lat: number; lng: number; items: GlobeItem[] }
+export interface GlobeItem { title: string; url: string; domain: string; type: string; year: string }
+export interface GlobePin { slug: string; label: string; lat: number; lng: number; since: string; items: GlobeItem[] }
 export interface GlobeArc {
   kind: 'bio' | 'theme';
   from: string; to: string;
@@ -20,7 +20,10 @@ export interface GlobeData { pins: GlobePin[]; arcs: GlobeArc[]; remote: GlobeIt
 
 const isGeo = (l?: Loc): l is Loc & { lat: number; lng: number } =>
   !!l && typeof l.lat === 'number' && typeof l.lng === 'number';
-const toItem = (it: Item): GlobeItem => ({ title: it.data.title, url: it.url, domain: it.domain, type: it.data.type });
+const toItem = (it: Item): GlobeItem => ({
+  title: it.data.title, url: it.url, domain: it.domain, type: it.data.type,
+  year: String(new Date(it.data.date).getUTCFullYear()),
+});
 
 function arc(kind: GlobeArc['kind'], a: string, b: string, weight: number, label: string): GlobeArc {
   const A = LOCS[a] as Required<Loc>, B = LOCS[b] as Required<Loc>;
@@ -34,7 +37,7 @@ export async function getGlobeData(): Promise<GlobeData> {
   const pins: GlobePin[] = Object.entries(LOCS)
     .filter(([, l]) => isGeo(l))
     .map(([slug, l]) => ({
-      slug, label: l.label, lat: l.lat!, lng: l.lng!,
+      slug, label: l.label, lat: l.lat!, lng: l.lng!, since: l.since ?? '',
       items: items.filter((it) => it.data.location === slug).map(toItem),
     }));
   const remote = items.filter((it) => !isGeo(LOCS[it.data.location])).map(toItem);

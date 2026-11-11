@@ -46,6 +46,7 @@ Each of these is a content edit. None needs code.
   3. Send a test message from the live Contact page.
   4. Check that it appears under **Forms** in Netlify, with topic, name, email and message.
   5. Optional: turn on email notifications for the `contact` form.
+- [ ] **Globe on your machine:** zoom into a place and check the NASA detail loads; hover pins for their cards; try Play my journey.
 - [ ] **Live site check after that deploy:**
   - [ ] The globe loads and the Earth textures show.
   - [ ] Pins open their panel, and Reset view zooms out.
