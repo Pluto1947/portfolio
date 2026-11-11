@@ -40,7 +40,7 @@ Each of these is a content edit. None needs code.
 
 ## **Tests still to run**
 
-- [ ] **Contact form, live test (Phase 4):**
+- [x] **Contact form, live test (Phase 4):** done, messages arrive by email.
   1. In the Netlify dashboard, open the site, go to **Forms**, and turn on form detection.
   2. Say "deploy". One production deploy costs 15 of the 300 monthly credits.
   3. Send a test message from the live Contact page.
