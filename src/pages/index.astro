@@ -22,9 +22,20 @@ const domains = await Promise.all(
       <div class="it">
         <h1 class="name">{site.name}</h1>
         <p class="line">{site.tagline}</p>
-        <p class="hint"><span class="mouse">Drag the globe, click a pin, or press <kbd>`</kbd> for the terminal</span><span class="touch">Drag the globe, tap a pin, or open the terminal</span></p>
+        <p class="hint"><span class="mouse">Drag the globe, click a pin, or press <kbd>`</kbd> (below Esc) for the terminal</span><span class="touch">Drag the globe, tap a pin, or open the terminal</span></p>
       </div>
     </div>
+    <script is:inline>
+      // Decide before first paint whether the intro plays, so the caption never
+      // flashes in the corner first. It stays hidden until it has been centred.
+      (function () {
+        var seen = false;
+        try { seen = sessionStorage.getItem('introSeen') === '1'; } catch (e) {}
+        if (seen || matchMedia('(prefers-reduced-motion: reduce)').matches || matchMedia('(max-width: 620px)').matches) return;
+        document.getElementById('intro').classList.add('centred', 'pending', 'no-anim');
+        document.getElementById('hero').classList.add('intro-on');
+      })();
+    </script>
     <Globe />
 
     <div class="key">
@@ -52,47 +63,46 @@ const domains = await Promise.all(
   }
   .hero { position: relative; }
 
-  /* intro: centred over a dimmed globe, then settled in the corner */
+  /* intro: the caption always has its settled corner layout; during the intro a
+     transform scales it up and moves it to the centre. Settling only animates
+     transform and opacity, which the graphics card handles without re-layout. */
   .intro {
     position: absolute; z-index: 4; pointer-events: none;
-    left: 50%; top: calc(50% - 40px); transform: translate(-50%, -50%);
-    width: min(90%, 760px); text-align: center;
-    display: flex; flex-direction: column; align-items: center; gap: 16px;
-    transition: left .9s cubic-bezier(.2,.7,.2,1), top .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1), width .9s, opacity .6s;
+    left: clamp(16px, 3vw, 40px); top: clamp(16px, 4vh, 40px); width: min(40%, 520px);
+    display: flex; flex-direction: row; align-items: center; gap: 14px; text-align: left;
+    transform-origin: 50% 50%;
+    transition: transform .9s cubic-bezier(.2,.7,.2,1), opacity .45s ease;
   }
+  .intro.pending { opacity: 0; }
+  .intro.no-anim, .intro.no-anim * { transition: none !important; }
+  .intro :global(.ip) { width: 64px; height: 64px; }
+  .intro .it { min-width: 0; }
   .intro .name {
     margin: 0; font-family: "Space Grotesk", sans-serif; font-weight: 700; line-height: 1.04; text-wrap: balance;
-    font-size: clamp(36px, 5.4vw, 68px); color: #dbfff7; transition: font-size .9s cubic-bezier(.2,.7,.2,1);
+    font-size: clamp(22px, 2.4vw, 32px); color: #dbfff7;
     text-shadow: 0 0 10px color-mix(in srgb, var(--teal) 55%, transparent), 1px 0 rgba(255,77,141,0.5), -1px 0 rgba(34,233,255,0.5);
   }
-  .intro .line { margin: 10px 0 0; color: #d6d4ea; font-size: clamp(14px, 1.5vw, 18px); transition: font-size .9s; }
-  .intro .hint { margin: 10px 0 0; color: var(--muted); font-size: 12.5px; opacity: 0; transition: opacity .5s .5s; }
+  .intro .line { margin: 6px 0 0; color: #d6d4ea; font-size: 14px; }
+  .intro .hint { margin: 8px 0 0; color: var(--muted); font-size: 12.5px; transition: opacity .5s .45s; }
+  .intro.centred .hint { opacity: 0; transition: none; }
   .intro .hint kbd { font: 11.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
   .intro .touch { display: none; }
   @media (hover: none) { .intro .mouse { display: none; } .intro .touch { display: inline; } }
-  .hero.intro-on :global(.globe) { filter: brightness(0.38); transition: filter .9s; }
-  .hero :global(.globe) { transition: filter .9s; }
 
-  /* photo: above the name during the intro, beside it once settled */
-  .intro :global(.ip) { width: 96px; height: 96px; transition: width .9s cubic-bezier(.2,.7,.2,1), height .9s cubic-bezier(.2,.7,.2,1); }
-  .intro .it { min-width: 0; }
-  .intro.settled { left: clamp(16px, 3vw, 40px); top: clamp(16px, 4vh, 40px); transform: none; width: min(40%, 520px); text-align: left;
-    flex-direction: row; align-items: center; gap: 14px; }
-  .intro.settled :global(.ip) { width: 64px; height: 64px; }
-  .intro.settled .name { font-size: clamp(22px, 2.4vw, 32px); }
-  .intro.settled .line { font-size: 14px; }
-  .intro.settled .hint { opacity: 1; }
+  /* dimming: a flat overlay that fades, instead of a filter on the 3D canvas */
+  .hero::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    background: rgba(10, 12, 24, 0.62); opacity: 0; transition: opacity .9s ease; }
+  .hero.intro-on::after { opacity: 1; }
 
   /* phones: no spare corner, so the intro sits above the globe in the page flow */
   @media (max-width: 620px) {
-    .intro, .intro.settled { position: static; transform: none; width: auto; text-align: left; padding: 20px 16px 0; align-self: stretch; flex-direction: row; align-items: center; gap: 12px; }
-    .intro :global(.ip), .intro.settled :global(.ip) { width: 56px; height: 56px; }
-    .intro .name, .intro.settled .name { font-size: 28px; }
-    .intro .line { font-size: 14px; }
-    .intro .hint { opacity: 1; }
-    .hero.intro-on :global(.globe) { filter: none; }
+    .intro { position: static; transform: none !important; width: auto; padding: 20px 16px 0; align-self: stretch; gap: 12px; }
+    .intro :global(.ip) { width: 56px; height: 56px; }
+    .intro .name { font-size: 28px; }
+    .intro .hint { opacity: 1 !important; }
+    .hero::after { display: none; }
   }
-  @media (prefers-reduced-motion: reduce) { .intro, .intro .name, .intro .line, .intro .hint, .hero :global(.globe) { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .intro, .intro .hint, .hero::after { transition: none; } }
 
   .key { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .domkey { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 8px; }
@@ -118,23 +128,36 @@ const domains = await Promise.all(
 <script>
   const hero = document.getElementById('hero');
   const intro = document.getElementById('intro');
-  if (hero && intro) {
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const phone = matchMedia('(max-width: 620px)').matches;
-    let seen = false;
-    try { seen = sessionStorage.getItem('introSeen') === '1'; } catch {}
+  if (hero && intro && intro.classList.contains('centred')) {
+    const events = ['pointerdown', 'wheel', 'keydown', 'touchstart'] as const;
+
+    // Move the settled caption to the centre of the hero and scale it up.
+    const centre = () => {
+      const prev = intro.style.transform;
+      intro.style.transform = 'none';
+      const h = hero.getBoundingClientRect(), r = intro.getBoundingClientRect();
+      const scale = Math.min(2, (h.width * 0.86) / r.width);
+      const dx = h.left + h.width / 2 - (r.left + r.width / 2);
+      const dy = h.top + h.height / 2 - 40 - (r.top + r.height / 2);
+      intro.style.transform = prev && prev !== 'none' ? prev : '';
+      intro.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+    };
+    const onResize = () => {
+      if (!intro.classList.contains('centred')) return;
+      intro.classList.add('no-anim'); centre(); requestAnimationFrame(() => intro.classList.remove('no-anim'));
+    };
     const settle = () => {
-      if (intro.classList.contains('settled')) return;
-      intro.classList.add('settled'); hero.classList.remove('intro-on');
+      if (!intro.classList.contains('centred')) return;
+      intro.classList.remove('centred', 'pending'); intro.style.transform = ''; hero.classList.remove('intro-on');
       try { sessionStorage.setItem('introSeen', '1'); } catch {}
       for (const ev of events) window.removeEventListener(ev, settle);
+      window.removeEventListener('resize', onResize);
     };
-    const events = ['pointerdown', 'wheel', 'keydown', 'touchstart'] as const;
-    if (seen || reduce || phone) settle();
-    else {
-      hero.classList.add('intro-on');
-      for (const ev of events) window.addEventListener(ev, settle, { passive: true });
-      setTimeout(settle, 2500);
-    }
+    centre();
+    // two frames later: turn transitions back on and fade the centred caption in
+    requestAnimationFrame(() => requestAnimationFrame(() => { intro.classList.remove('no-anim', 'pending'); }));
+    for (const ev of events) window.addEventListener(ev, settle, { passive: true });
+    window.addEventListener('resize', onResize);
+    setTimeout(settle, 2500);
   }
 </script>

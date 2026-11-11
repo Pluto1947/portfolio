@@ -40,12 +40,13 @@ Each of these is a content edit. None needs code.
 
 ## **Tests still to run**
 
-- [ ] **Contact form, live test (Phase 4):**
+- [x] **Contact form, live test (Phase 4):** done, messages arrive by email.
   1. In the Netlify dashboard, open the site, go to **Forms**, and turn on form detection.
   2. Say "deploy". One production deploy costs 15 of the 300 monthly credits.
   3. Send a test message from the live Contact page.
   4. Check that it appears under **Forms** in Netlify, with topic, name, email and message.
   5. Optional: turn on email notifications for the `contact` form.
+- [ ] **Globe on your machine:** zoom into a place and check the NASA detail loads; hover pins for their cards; try Play my journey.
 - [ ] **Live site check after that deploy:**
   - [ ] The globe loads and the Earth textures show.
   - [ ] Pins open their panel, and Reset view zooms out.

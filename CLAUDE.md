@@ -24,7 +24,7 @@ This file is for Claude Code specifically. **Read `AGENTS.md` first** — it's t
 - Background motif: dot-halftone dome/horizon texture + flat scrim overlay, used site-wide (full version on landing, subtler echo elsewhere). See `AGENTS.md` "Confirmed design decisions" for the exact composition and implementation notes — exact shape/ring details are still refinable in Phase 6, don't treat those as needing another round of options first.
 
 - Landing hero: **Globe only**, centred, no heading, domain key as a small row under it. Picked in Phase 3.
-- Globe look: realistic **night lights** Earth with relief, no atmosphere glow, drawn across the whole hero with soft faded edges so it sits on the background; pins are **map pin icons with labels** and a pulsing ring. Confirmed by Dan in Phase 3. See `AGENTS.md` for details.
+- Globe look: realistic **night lights** Earth with relief, no atmosphere glow, drawn across the whole hero with soft faded edges so it sits on the background; pins are **map pin icons** with a pulsing ring and **no permanent labels**: hovering or focusing a pin shows a card (place, since date, items). Plus faint coastlines, borders and fading country names, NASA detail tiles when zoomed in, and a "Play my journey" tour. Confirmed by Dan (Phase 3, revised in Phase 8). See `AGENTS.md` for details.
 
 ## Commands
 
@@ -88,7 +88,7 @@ The writing style rule is in `AGENTS.md` Conventions. On top of that, for write-
 
 ## Current state
 
-- Phases 0 to 3 and 5 to 7 are done; Phase 4 is built with its live test deferred. Now in Phase 8 (content and launch). `npm run check:launch` lists what still blocks launch. `CHECKLIST.md` tracks Dan's deferred content, tests and later phase items: keep it updated.
+- Phases 0 to 7 are done. Phase 4's live test passed: contact form messages reach Dan by email. The site is live from `main` (Dan merged the branch). Now in Phase 8 (content and launch). `npm run check:launch` lists what still blocks launch. `CHECKLIST.md` tracks Dan's deferred content, tests and later phase items: keep it updated.
 - Phases 0 to 3 are done. Phase 4 (contact form) is built on the branch: layout B (service cards plus form), picked by Dan. The real submission test is deferred by Dan: it needs form detection turned on in Netlify and one deploy to `main` (only when Dan says "deploy"). Dan asked to continue to Phase 5 meanwhile.
 - Phase 5 in progress. Done: evidence figures in write-ups (figure card frame, recordings play on click, screenshots open full size), with placeholder media in the example write-up. Also done: the site terminal, placement C (corner button or backtick on every page). Phase 5 is signed off by Dan. `whoami` text in `content/_terminal.json` is a placeholder for Dan.
 - Services and the Contact intro line are placeholders. Dan will update `content/_services.json` and the intro later.

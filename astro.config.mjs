@@ -38,12 +38,11 @@ const pluginRev = crypto
   .slice(0, 12);
 
 // https://astro.build/config
-// globe.gl imports modules for layers this site never uses (map tiles, hexagons,
-// heatmaps, 3D labels, polygons). Point them at small stand ins to more than halve
+// globe.gl imports modules for layers this site never uses (hexagons, heatmaps,
+// 3D labels, polygons). Map tiles are used (NASA zoom detail), so not stubbed. Point them at small stand ins to more than halve
 // the globe bundle. See src/lib/globe-stubs/README.md before using those layers.
 const stub = (f) => fileURLToPath(new URL(`./src/lib/globe-stubs/${f}`, import.meta.url));
 const globeStubs = [
-  { find: /^three-slippy-map-globe$/, replacement: stub('slippy-map.js') },
   { find: /^three-geojson-geometry$/, replacement: stub('geojson-geometry.js') },
   { find: /^three-conic-polygon-geometry$/, replacement: stub('conic-polygon-geometry.js') },
   { find: /^h3-js$/, replacement: stub('h3.js') },

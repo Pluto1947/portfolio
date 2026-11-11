@@ -31,7 +31,7 @@ const data = {
 ---
 
 <button class="st-fab" id="st-fab" type="button" aria-controls="st-pop" aria-expanded="false">
-  <b aria-hidden="true">&gt;_</b> Terminal <kbd aria-hidden="true">`</kbd>
+  <b aria-hidden="true">&gt;_</b> Terminal <kbd aria-hidden="true" title="Backtick, the key below Esc">`</kbd>
 </button>
 
 <div class="st-pop" id="st-pop" role="dialog" aria-label="Site terminal" hidden>
@@ -272,7 +272,10 @@ const data = {
     document.addEventListener('keydown', (e) => {
       const t = e.target as HTMLElement;
       const typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
-      if (e.key === '`' && !e.metaKey && !e.ctrlKey && !e.altKey && (!typing || pop.contains(t))) { e.preventDefault(); pop.hidden ? open() : close(); }
+      // The key below Esc. Checked by physical key (e.code) as well as by character,
+      // so it also works on layouts where backtick is a dead key that waits for a letter.
+      const backtick = e.key === '`' || e.code === 'Backquote';
+      if (backtick && !e.metaKey && !e.ctrlKey && !e.altKey && (!typing || pop.contains(t))) { e.preventDefault(); pop.hidden ? open() : close(); }
     });
   }
 </script>
